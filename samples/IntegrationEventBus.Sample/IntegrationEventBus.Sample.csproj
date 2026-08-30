@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IntegrationEventBus.Core\IntegrationEventBus.Core.csproj" />
+    <ProjectReference Include="..\..\src\IntegrationEventBus.Hosting\IntegrationEventBus.Hosting.csproj" />
+    <ProjectReference Include="..\..\src\IntegrationEventBus.SqlServer\IntegrationEventBus.SqlServer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Public contracts for IntegrationEventBus.</Description>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+</Project>
