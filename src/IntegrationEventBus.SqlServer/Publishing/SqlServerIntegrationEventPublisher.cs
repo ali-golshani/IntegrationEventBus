@@ -12,9 +12,6 @@ internal sealed class SqlServerIntegrationEventPublisher(
     IProcessorSignal processorSignal)
     : IIntegrationEventPublisher
 {
-    private static readonly string InsertDeliveryQuery = Properties.Resources.InsertDelivery;
-    private static readonly string InsertEventQuery = Properties.Resources.InsertEvent;
-
     public async ValueTask<Guid> PublishAsync<TEvent>(
         TEvent integrationEvent,
         DbTransaction transaction,
@@ -99,23 +96,16 @@ internal sealed class SqlServerIntegrationEventPublisher(
         await using var command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandTimeout = options.CommandTimeoutSeconds;
-        command.CommandText = InsertEventQuery;
-
-        command.Parameters.Add(new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = eventId });
-        command.Parameters.Add(new SqlParameter("@EventName", SqlDbType.NVarChar, 200) { Value = definition.EventName });
-        command.Parameters.Add(new SqlParameter("@Topic", SqlDbType.NVarChar, 200) { Value = definition.Topic });
-        command.Parameters.Add(new SqlParameter("@PayloadJson", SqlDbType.NVarChar, -1) { Value = payloadJson });
-        command.Parameters.Add(new SqlParameter("@OccurredAtUtc", SqlDbType.DateTimeOffset) { Value = occurredAtUtc });
-        command.Parameters.Add(new SqlParameter("@CorrelationId", SqlDbType.NVarChar, 200)
-        {
-            Value = (object?)correlationId ?? DBNull.Value
-        });
-        command.Parameters.Add(new SqlParameter("@CausationId", SqlDbType.UniqueIdentifier)
-        {
-            Value = (object?)causationId ?? DBNull.Value
-        });
-
-        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        await SqlServerQueries.InsertEventAsync(
+            command,
+            eventId,
+            definition.EventName,
+            definition.Topic,
+            payloadJson,
+            occurredAtUtc,
+            correlationId,
+            causationId,
+            cancellationToken);
     }
 
     private async Task InsertDeliveryAsync(
@@ -128,20 +118,13 @@ internal sealed class SqlServerIntegrationEventPublisher(
         await using var command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandTimeout = options.CommandTimeoutSeconds;
-        command.CommandText = InsertDeliveryQuery;
-
-        command.Parameters.Add(new SqlParameter("@EventId", SqlDbType.UniqueIdentifier) { Value = eventId });
-        command.Parameters.Add(new SqlParameter("@SubscriptionName", SqlDbType.NVarChar, 200) { Value = subscription.Name });
-        command.Parameters.Add(new SqlParameter("@Status", SqlDbType.TinyInt) { Value = (byte)DeliveryStatus.Pending });
-        command.Parameters.Add(new SqlParameter("@RetryPolicyName", SqlDbType.NVarChar, 200)
-        {
-            Value = subscription.RetryPolicy.Name
-        });
-        command.Parameters.Add(new SqlParameter("@RetryPolicyVersion", SqlDbType.Int)
-        {
-            Value = subscription.RetryPolicy.Version
-        });
-
-        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        await SqlServerQueries.InsertDeliveryAsync(
+            command,
+            eventId,
+            subscription.Name,
+            (byte)DeliveryStatus.Pending,
+            subscription.RetryPolicy.Name,
+            subscription.RetryPolicy.Version,
+            cancellationToken);
     }
 }

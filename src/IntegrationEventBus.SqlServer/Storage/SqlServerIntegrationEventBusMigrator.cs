@@ -7,8 +7,6 @@ namespace IntegrationEventBus.SqlServer;
 /// </summary>
 public sealed class SqlServerIntegrationEventBusMigrator
 {
-    private static readonly string CreateSchemaQuery = Properties.Resources.CreateSchema;
-
     private readonly SqlServerIntegrationEventBusOptions _options;
 
     internal SqlServerIntegrationEventBusMigrator(SqlServerIntegrationEventBusOptions options)
@@ -25,7 +23,6 @@ public sealed class SqlServerIntegrationEventBusMigrator
         await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
         await using var command = connection.CreateCommand();
         command.CommandTimeout = _options.CommandTimeoutSeconds;
-        command.CommandText = CreateSchemaQuery;
-        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        await SqlServerQueries.CreateSchemaAsync(command, cancellationToken);
     }
 }

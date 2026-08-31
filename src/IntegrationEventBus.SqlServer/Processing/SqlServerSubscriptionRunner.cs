@@ -1,9 +1,9 @@
-using System.Data;
-using System.Security.Cryptography;
-using System.Text;
 using IntegrationEventBus.Infrastructure;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+using System.Data;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace IntegrationEventBus.SqlServer;
 
@@ -14,12 +14,6 @@ internal sealed class SqlServerSubscriptionRunner(
     ILogger<SqlServerSubscriptionRunner> logger)
     : ISubscriptionRunner
 {
-    private static readonly string AcquireSubscriptionLockQuery = Properties.Resources.AcquireSubscriptionLock;
-    private static readonly string ClaimNextDeliveryQuery = Properties.Resources.ClaimNextDelivery;
-    private static readonly string MarkFailedQuery = Properties.Resources.MarkFailed;
-    private static readonly string MarkSucceededQuery = Properties.Resources.MarkSucceeded;
-    private static readonly string ReleaseCancelledAttemptQuery = Properties.Resources.ReleaseCancelledAttempt;
-
     public async Task RunAsync(
         SubscriptionDefinition subscription,
         string processorId,
@@ -160,11 +154,11 @@ internal sealed class SqlServerSubscriptionRunner(
 
         await using var command = connection.CreateCommand();
         command.CommandTimeout = options.CommandTimeoutSeconds;
-        command.CommandText = AcquireSubscriptionLockQuery;
-        command.Parameters.Add(new SqlParameter("@Resource", SqlDbType.NVarChar, 255) { Value = resource });
+        var result = await SqlServerQueries.AcquireSubscriptionLockAsync(
+            command,
+            resource,
+            cancellationToken);
 
-        var result = (int)(await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false)
-            ?? throw new InvalidOperationException("sp_getapplock did not return a result."));
         if (result == -1)
         {
             return false;
@@ -193,61 +187,34 @@ internal sealed class SqlServerSubscriptionRunner(
         await using var command = connection.CreateCommand();
         command.Transaction = (SqlTransaction)transaction;
         command.CommandTimeout = options.CommandTimeoutSeconds;
-        command.CommandText = ClaimNextDeliveryQuery;
-
-        command.Parameters.Add(new SqlParameter("@SubscriptionName", SqlDbType.NVarChar, 200) { Value = subscriptionName });
-        command.Parameters.Add(new SqlParameter("@Pending", SqlDbType.TinyInt) { Value = (byte)DeliveryStatus.Pending });
-        command.Parameters.Add(new SqlParameter("@Retrying", SqlDbType.TinyInt) { Value = (byte)DeliveryStatus.Retrying });
-        command.Parameters.Add(new SqlParameter("@NowUtc", SqlDbType.DateTimeOffset) { Value = nowUtc });
-
-        StoredEventDelivery? delivery = null;
-        await using (var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
-        {
-            if (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
-            {
-                delivery = new StoredEventDelivery(
-                    DeliveryId: reader.GetInt64(0),
-                    EventSequence: reader.GetInt64(1),
-                    EventId: reader.GetGuid(2),
-                    EventName: reader.GetString(3),
-                    Topic: reader.GetString(4),
-                    PayloadJson: reader.GetString(5),
-                    OccurredAtUtc: reader.GetFieldValue<DateTimeOffset>(6),
-                    CorrelationId: reader.IsDBNull(7) ? null : reader.GetString(7),
-                    CausationId: reader.IsDBNull(8) ? null : reader.GetGuid(8),
-                    Attempt: reader.GetInt32(9),
-                    FirstFailedAtUtc: reader.IsDBNull(10)
-                        ? null
-                        : reader.GetFieldValue<DateTimeOffset>(10));
-            }
-        }
+        var delivery = await SqlServerQueries.ClaimNextDeliveryAsync(
+            command,
+            subscriptionName,
+            (byte)DeliveryStatus.Pending,
+            (byte)DeliveryStatus.Retrying,
+            nowUtc,
+            cancellationToken);
 
         await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
         return delivery;
     }
 
-    private Task MarkSucceededAsync(
+    private async Task MarkSucceededAsync(
         SqlConnection connection,
         long deliveryId,
-        CancellationToken cancellationToken) =>
-        ExecuteDeliveryUpdateAsync(
-            connection,
-            MarkSucceededQuery,
+        CancellationToken cancellationToken)
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandTimeout = options.CommandTimeoutSeconds;
+        await SqlServerQueries.MarkSucceededAsync(
+            command,
             deliveryId,
-            command =>
-            {
-                command.Parameters.Add(new SqlParameter("@Status", SqlDbType.TinyInt)
-                {
-                    Value = (byte)DeliveryStatus.Succeeded
-                });
-                command.Parameters.Add(new SqlParameter("@NowUtc", SqlDbType.DateTimeOffset)
-                {
-                    Value = DateTimeOffset.UtcNow
-                });
-            },
+            (byte)DeliveryStatus.Succeeded,
+            DateTimeOffset.UtcNow,
             cancellationToken);
+    }
 
-    private Task MarkFailedAsync(
+    private async Task MarkFailedAsync(
         SqlConnection connection,
         long deliveryId,
         DateTimeOffset firstFailedAtUtc,
@@ -262,66 +229,33 @@ internal sealed class SqlServerSubscriptionRunner(
             error = error[..32_768];
         }
 
-        return ExecuteDeliveryUpdateAsync(
-            connection,
-            MarkFailedQuery,
+        await using var command = connection.CreateCommand();
+        command.CommandTimeout = options.CommandTimeoutSeconds;
+        await SqlServerQueries.MarkFailedAsync(
+            command,
             deliveryId,
-            command =>
-            {
-                command.Parameters.Add(new SqlParameter("@Status", SqlDbType.TinyInt)
-                {
-                    Value = decision.IsDeadLetter
-                        ? (byte)DeliveryStatus.DeadLettered
-                        : (byte)DeliveryStatus.Retrying
-                });
-                command.Parameters.Add(new SqlParameter("@BlocksFollowing", SqlDbType.Bit)
-                {
-                    Value = decision.BlocksFollowingEvents
-                });
-                command.Parameters.Add(new SqlParameter("@NextAttemptAtUtc", SqlDbType.DateTimeOffset)
-                {
-                    Value = (object?)decision.NextAttemptAtUtc ?? DBNull.Value
-                });
-                command.Parameters.Add(new SqlParameter("@FirstFailedAtUtc", SqlDbType.DateTimeOffset)
-                {
-                    Value = firstFailedAtUtc
-                });
-                command.Parameters.Add(new SqlParameter("@LastError", SqlDbType.NVarChar, -1)
-                {
-                    Value = error
-                });
-                command.Parameters.Add(new SqlParameter("@CompletedAtUtc", SqlDbType.DateTimeOffset)
-                {
-                    Value = decision.IsDeadLetter ? nowUtc : DBNull.Value
-                });
-            },
+            decision.IsDeadLetter
+                ? (byte)DeliveryStatus.DeadLettered
+                : (byte)DeliveryStatus.Retrying,
+            decision.BlocksFollowingEvents,
+            decision.NextAttemptAtUtc,
+            firstFailedAtUtc,
+            error,
+            decision.IsDeadLetter ? nowUtc : null,
             cancellationToken);
     }
 
-    private Task ReleaseCancelledAttemptAsync(
+    private async Task ReleaseCancelledAttemptAsync(
         SqlConnection connection,
         long deliveryId,
-        CancellationToken cancellationToken) =>
-        ExecuteDeliveryUpdateAsync(
-            connection,
-            ReleaseCancelledAttemptQuery,
-            deliveryId,
-            command => command.Parameters.Add(
-                new SqlParameter("@NowUtc", SqlDbType.DateTimeOffset) { Value = DateTimeOffset.UtcNow }),
-            cancellationToken);
-
-    private async Task ExecuteDeliveryUpdateAsync(
-        SqlConnection connection,
-        string commandText,
-        long deliveryId,
-        Action<SqlCommand> addParameters,
         CancellationToken cancellationToken)
     {
         await using var command = connection.CreateCommand();
         command.CommandTimeout = options.CommandTimeoutSeconds;
-        command.CommandText = commandText;
-        command.Parameters.Add(new SqlParameter("@DeliveryId", SqlDbType.BigInt) { Value = deliveryId });
-        addParameters(command);
-        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        await SqlServerQueries.ReleaseCancelledAttemptAsync(
+            command,
+            deliveryId,
+            DateTimeOffset.UtcNow,
+            cancellationToken);
     }
 }
