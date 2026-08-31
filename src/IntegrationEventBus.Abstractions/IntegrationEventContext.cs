@@ -46,9 +46,4 @@ public sealed record IntegrationEventContext
     /// </summary>
     public Guid? CausationId { get; init; }
 
-    /// <summary>
-    /// Gets application-defined metadata associated with the event.
-    /// </summary>
-    public IReadOnlyDictionary<string, string> Headers { get; init; } =
-        new Dictionary<string, string>();
 }

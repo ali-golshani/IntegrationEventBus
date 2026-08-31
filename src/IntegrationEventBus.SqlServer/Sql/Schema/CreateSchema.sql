@@ -3,7 +3,7 @@ BEGIN TRANSACTION;
 
 DECLARE @lockResult INT;
 EXEC @lockResult = sys.sp_getapplock
-    @Resource = N'IntegrationEventBus:Schema:{{SchemaName}}',
+    @Resource = N'IntegrationEventBus:Schema:cap',
     @LockMode = 'Exclusive',
     @LockOwner = 'Transaction',
     @LockTimeout = 30000;
@@ -11,19 +11,18 @@ EXEC @lockResult = sys.sp_getapplock
 IF @lockResult < 0
     THROW 50000, 'Could not acquire the IntegrationEventBus schema lock.', 1;
 
-IF SCHEMA_ID(N'{{SchemaName}}') IS NULL
-    EXEC(N'CREATE SCHEMA {{Schema}}');
+IF SCHEMA_ID(N'cap') IS NULL
+    EXEC(N'CREATE SCHEMA [cap]');
 
-IF OBJECT_ID(N'{{Schema}}.[Events]', N'U') IS NULL
+IF OBJECT_ID(N'[cap].[Events]', N'U') IS NULL
 BEGIN
-    CREATE TABLE {{Schema}}.[Events]
+    CREATE TABLE [cap].[Events]
     (
         [Sequence] BIGINT IDENTITY(1,1) NOT NULL,
         [Id] UNIQUEIDENTIFIER NOT NULL,
         [EventName] NVARCHAR(200) NOT NULL,
         [Topic] NVARCHAR(200) NOT NULL,
         [PayloadJson] NVARCHAR(MAX) NOT NULL,
-        [HeadersJson] NVARCHAR(MAX) NOT NULL,
         [OccurredAtUtc] DATETIMEOFFSET(7) NOT NULL,
         [CreatedAtUtc] DATETIMEOFFSET(7) NOT NULL,
         [CorrelationId] NVARCHAR(200) NULL,
@@ -33,9 +32,9 @@ BEGIN
     );
 END;
 
-IF OBJECT_ID(N'{{Schema}}.[Deliveries]', N'U') IS NULL
+IF OBJECT_ID(N'[cap].[Deliveries]', N'U') IS NULL
 BEGIN
-    CREATE TABLE {{Schema}}.[Deliveries]
+    CREATE TABLE [cap].[Deliveries]
     (
         [Id] BIGINT IDENTITY(1,1) NOT NULL,
         [EventId] UNIQUEIDENTIFIER NOT NULL,
@@ -52,13 +51,13 @@ BEGIN
         [RetryPolicyVersion] INT NOT NULL,
         CONSTRAINT [PK_IntegrationEventBus_Deliveries] PRIMARY KEY CLUSTERED ([Id]),
         CONSTRAINT [FK_IntegrationEventBus_Deliveries_Events]
-            FOREIGN KEY ([EventId]) REFERENCES {{Schema}}.[Events]([Id]),
+            FOREIGN KEY ([EventId]) REFERENCES [cap].[Events]([Id]),
         CONSTRAINT [UQ_IntegrationEventBus_Deliveries_Event_Subscription]
             UNIQUE ([EventId], [SubscriptionName])
     );
 
     CREATE INDEX [IX_IntegrationEventBus_Deliveries_Ready]
-        ON {{Schema}}.[Deliveries]
+        ON [cap].[Deliveries]
         ([SubscriptionName], [Status], [BlocksFollowing], [NextAttemptAtUtc])
         INCLUDE ([EventId], [AttemptCount]);
 END;

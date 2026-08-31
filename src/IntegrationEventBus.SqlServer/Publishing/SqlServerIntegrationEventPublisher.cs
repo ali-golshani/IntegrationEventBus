@@ -57,14 +57,12 @@ internal sealed class SqlServerIntegrationEventPublisher(
         }
 
         var payloadJson = serializer.Serialize(integrationEvent, typeof(TEvent));
-        var headersJson = serializer.SerializeHeaders(publishOptions?.Headers);
         await InsertEventAsync(
                 connection,
                 sqlTransaction,
                 eventId,
                 definition,
                 payloadJson,
-                headersJson,
                 occurredAtUtc,
                 correlationId,
                 publishOptions?.CausationId,
@@ -94,7 +92,6 @@ internal sealed class SqlServerIntegrationEventPublisher(
         Guid eventId,
         IntegrationEventDefinition definition,
         string payloadJson,
-        string headersJson,
         DateTimeOffset occurredAtUtc,
         string? correlationId,
         Guid? causationId,
@@ -109,7 +106,6 @@ internal sealed class SqlServerIntegrationEventPublisher(
         command.Parameters.Add(new SqlParameter("@EventName", SqlDbType.NVarChar, 200) { Value = definition.EventName });
         command.Parameters.Add(new SqlParameter("@Topic", SqlDbType.NVarChar, 200) { Value = definition.Topic });
         command.Parameters.Add(new SqlParameter("@PayloadJson", SqlDbType.NVarChar, -1) { Value = payloadJson });
-        command.Parameters.Add(new SqlParameter("@HeadersJson", SqlDbType.NVarChar, -1) { Value = headersJson });
         command.Parameters.Add(new SqlParameter("@OccurredAtUtc", SqlDbType.DateTimeOffset) { Value = occurredAtUtc });
         command.Parameters.Add(new SqlParameter("@CorrelationId", SqlDbType.NVarChar, 200)
         {

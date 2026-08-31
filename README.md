@@ -105,7 +105,7 @@ is not recalculated during application startup.
 
 ## Database
 
-By default the provider creates the `IntegrationEventBus` schema and the `Events` and `Deliveries`
+By default the provider creates the `cap` schema and the `Events` and `Deliveries`
 tables on first use. Set `AutoCreateSchema` to `false` when database objects are managed through a
 separate deployment process.
 

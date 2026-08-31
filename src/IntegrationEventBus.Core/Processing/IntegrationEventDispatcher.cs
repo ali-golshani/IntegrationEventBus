@@ -41,8 +41,7 @@ internal sealed class IntegrationEventDispatcher(
             OccurredAtUtc = delivery.OccurredAtUtc,
             Attempt = delivery.Attempt,
             CorrelationId = delivery.CorrelationId,
-            CausationId = delivery.CausationId,
-            Headers = serializer.DeserializeHeaders(delivery.HeadersJson)
+            CausationId = delivery.CausationId
         };
 
         await using var scope = scopeFactory.CreateAsyncScope();

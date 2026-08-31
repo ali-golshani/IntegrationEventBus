@@ -4,8 +4,7 @@ using System.Text;
 
 namespace IntegrationEventBus.SqlServer;
 
-internal sealed class EmbeddedSqlScriptProvider(SqlServerIntegrationEventBusOptions options)
-    : ISqlScriptProvider
+internal sealed class EmbeddedSqlScriptProvider : ISqlScriptProvider
 {
     private const string ResourcePrefix = "IntegrationEventBus.SqlServer.Sql";
 
@@ -29,9 +28,9 @@ internal sealed class EmbeddedSqlScriptProvider(SqlServerIntegrationEventBusOpti
 
     private readonly ConcurrentDictionary<SqlScript, string> _cache = new();
 
-    public string Get(SqlScript script) => _cache.GetOrAdd(script, LoadAndPrepare);
+    public string Get(SqlScript script) => _cache.GetOrAdd(script, Load);
 
-    private string LoadAndPrepare(SqlScript script)
+    private string Load(SqlScript script)
     {
         if (!ResourceNames.TryGetValue(script, out var resourceName))
         {
@@ -46,16 +45,6 @@ internal sealed class EmbeddedSqlScriptProvider(SqlServerIntegrationEventBusOpti
             Encoding.UTF8,
             detectEncodingFromByteOrderMarks: true);
 
-        var commandText = reader.ReadToEnd()
-            .Replace("{{Schema}}", SqlIdentifier.Quote(options.SchemaName), StringComparison.Ordinal)
-            .Replace("{{SchemaName}}", options.SchemaName, StringComparison.Ordinal);
-
-        if (commandText.Contains("{{", StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException(
-                $"Embedded SQL resource '{resourceName}' contains an unresolved template token.");
-        }
-
-        return commandText;
+        return reader.ReadToEnd();
     }
 }

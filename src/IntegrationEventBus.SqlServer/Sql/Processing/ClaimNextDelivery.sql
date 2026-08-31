@@ -5,8 +5,8 @@
         e.[Sequence] AS [EventSequence],
         d.[BlocksFollowing],
         d.[NextAttemptAtUtc]
-    FROM {{Schema}}.[Deliveries] AS d WITH (UPDLOCK, HOLDLOCK, ROWLOCK)
-    INNER JOIN {{Schema}}.[Events] AS e ON e.[Id] = d.[EventId]
+    FROM [cap].[Deliveries] AS d WITH (UPDLOCK, HOLDLOCK, ROWLOCK)
+    INNER JOIN [cap].[Events] AS e ON e.[Id] = d.[EventId]
     WHERE d.[SubscriptionName] = @SubscriptionName
       AND d.[Status] IN (@Pending, @Retrying)
 ),
@@ -40,12 +40,11 @@ OUTPUT
     e.[EventName],
     e.[Topic],
     e.[PayloadJson],
-    e.[HeadersJson],
     e.[OccurredAtUtc],
     e.[CorrelationId],
     e.[CausationId],
     inserted.[AttemptCount],
     inserted.[FirstFailedAtUtc]
-FROM {{Schema}}.[Deliveries] AS d
+FROM [cap].[Deliveries] AS d
 INNER JOIN [Candidate] AS c ON c.[Id] = d.[Id]
-INNER JOIN {{Schema}}.[Events] AS e ON e.[Id] = d.[EventId];
+INNER JOIN [cap].[Events] AS e ON e.[Id] = d.[EventId];

@@ -10,7 +10,6 @@ public sealed record StoredEventDelivery(
     string EventName,
     string Topic,
     string PayloadJson,
-    string HeadersJson,
     DateTimeOffset OccurredAtUtc,
     string? CorrelationId,
     Guid? CausationId,

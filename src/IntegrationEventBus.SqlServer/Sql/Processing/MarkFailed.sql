@@ -1,4 +1,4 @@
-UPDATE {{Schema}}.[Deliveries]
+UPDATE [cap].[Deliveries]
 SET [Status] = @Status,
     [BlocksFollowing] = @BlocksFollowing,
     [NextAttemptAtUtc] = @NextAttemptAtUtc,

@@ -151,7 +151,7 @@ internal sealed class SqlServerSubscriptionRunner(
         SubscriptionDefinition subscription,
         CancellationToken cancellationToken)
     {
-        var lockInput = $"{options.SchemaName}:{subscription.Topic}:{subscription.Name}";
+        var lockInput = $"{SqlServerConstants.SchemaName}:{subscription.Topic}:{subscription.Name}";
         var lockHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(lockInput)));
         var resource = $"IntegrationEventBus:{lockHash}";
 
@@ -209,14 +209,13 @@ internal sealed class SqlServerSubscriptionRunner(
                     EventName: reader.GetString(3),
                     Topic: reader.GetString(4),
                     PayloadJson: reader.GetString(5),
-                    HeadersJson: reader.GetString(6),
-                    OccurredAtUtc: reader.GetFieldValue<DateTimeOffset>(7),
-                    CorrelationId: reader.IsDBNull(8) ? null : reader.GetString(8),
-                    CausationId: reader.IsDBNull(9) ? null : reader.GetGuid(9),
-                    Attempt: reader.GetInt32(10),
-                    FirstFailedAtUtc: reader.IsDBNull(11)
+                    OccurredAtUtc: reader.GetFieldValue<DateTimeOffset>(6),
+                    CorrelationId: reader.IsDBNull(7) ? null : reader.GetString(7),
+                    CausationId: reader.IsDBNull(8) ? null : reader.GetGuid(8),
+                    Attempt: reader.GetInt32(9),
+                    FirstFailedAtUtc: reader.IsDBNull(10)
                         ? null
-                        : reader.GetFieldValue<DateTimeOffset>(11));
+                        : reader.GetFieldValue<DateTimeOffset>(10));
             }
         }
 

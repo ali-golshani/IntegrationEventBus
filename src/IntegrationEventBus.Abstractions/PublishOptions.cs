@@ -27,8 +27,4 @@ public sealed record PublishOptions
     /// </summary>
     public Guid? CausationId { get; init; }
 
-    /// <summary>
-    /// Gets application-defined metadata to persist with the event.
-    /// </summary>
-    public IReadOnlyDictionary<string, string>? Headers { get; init; }
 }

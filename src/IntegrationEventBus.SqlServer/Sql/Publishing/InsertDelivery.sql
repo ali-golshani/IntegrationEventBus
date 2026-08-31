@@ -1,4 +1,4 @@
-INSERT INTO {{Schema}}.[Deliveries]
+INSERT INTO [cap].[Deliveries]
     ([EventId], [SubscriptionName], [Status], [AttemptCount], [BlocksFollowing],
      [NextAttemptAtUtc], [RetryPolicyName], [RetryPolicyVersion])
 VALUES

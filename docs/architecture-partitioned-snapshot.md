@@ -97,7 +97,6 @@ StoredAtUtc
 CorrelationId
 CausationId
 TraceParent
-Headers
 ```
 
 ### EventDeliveries
