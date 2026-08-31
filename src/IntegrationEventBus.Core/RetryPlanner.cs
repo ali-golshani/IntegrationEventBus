@@ -32,7 +32,8 @@ public static class RetryPlanner
             throw new ArgumentOutOfRangeException(nameof(firstFailedAtUtc));
         }
 
-        var lifetimeExpired = policy.DeadLetterAfter is { } lifetime
+        var lifetimeExpired = 
+            policy.DeadLetterAfter is { } lifetime
             && nowUtc - firstFailedAtUtc >= lifetime;
 
         if (failedAttempt >= policy.MaxAttempts || lifetimeExpired)

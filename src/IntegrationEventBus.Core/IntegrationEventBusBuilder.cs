@@ -19,8 +19,6 @@ public sealed class IntegrationEventBusBuilder
     }
 
     public IServiceCollection Services { get; }
-
     public IntegrationEventTopology Topology { get; }
-
     public JsonSerializerOptions SerializerOptions { get; }
 }

@@ -16,19 +16,21 @@ public sealed class IntegrationEventTopology
     {
         _eventsByType = new ReadOnlyDictionary<Type, IntegrationEventDefinition>(
             new Dictionary<Type, IntegrationEventDefinition>(eventsByType));
+
         _subscriptionsByName = new ReadOnlyDictionary<string, SubscriptionDefinition>(
             new Dictionary<string, SubscriptionDefinition>(subscriptionsByName, StringComparer.OrdinalIgnoreCase));
     }
 
-    public IReadOnlyCollection<IntegrationEventDefinition> Events => _eventsByType.Values.ToArray();
+    public IReadOnlyCollection<IntegrationEventDefinition> Events => [.. _eventsByType.Values];
+    public IReadOnlyCollection<SubscriptionDefinition> Subscriptions => [.. _subscriptionsByName.Values];
 
-    public IReadOnlyCollection<SubscriptionDefinition> Subscriptions => _subscriptionsByName.Values.ToArray();
-
-    public IntegrationEventDefinition GetEvent(Type eventType) =>
-        _eventsByType.TryGetValue(eventType, out var definition)
+    public IntegrationEventDefinition GetEvent(Type eventType)
+    {
+        return
+            _eventsByType.TryGetValue(eventType, out var definition)
             ? definition
-            : throw new InvalidOperationException(
-                $"Integration event type '{eventType.FullName}' is not registered.");
+            : throw new InvalidOperationException($"Integration event type '{eventType.FullName}' is not registered.");
+    }
 
     public IntegrationEventDefinition GetEvent(string eventName)
     {
@@ -43,20 +45,23 @@ public sealed class IntegrationEventTopology
         throw new InvalidOperationException($"Integration event name '{eventName}' is not registered.");
     }
 
-    public SubscriptionDefinition GetSubscription(string subscriptionName) =>
-        _subscriptionsByName.TryGetValue(subscriptionName, out var definition)
-            ? definition
-            : throw new InvalidOperationException(
-                $"Integration event subscription '{subscriptionName}' is not registered.");
-
-    public IReadOnlyList<SubscriptionDefinition> GetSubscriptions(
-        Type eventType,
-        string topic)
+    public SubscriptionDefinition GetSubscription(string subscriptionName)
     {
-        return _subscriptionsByName.Values
-            .Where(subscription =>
+        return
+            _subscriptionsByName.TryGetValue(subscriptionName, out var definition)
+            ? definition
+            : throw new InvalidOperationException($"Integration event subscription '{subscriptionName}' is not registered.");
+    }
+
+    public IReadOnlyList<SubscriptionDefinition> GetSubscriptions(Type eventType, string topic)
+    {
+        return [.. _subscriptionsByName.Values.Where(predicate)];
+
+        bool predicate(SubscriptionDefinition subscription)
+        {
+            return
                 string.Equals(subscription.Topic, topic, StringComparison.OrdinalIgnoreCase)
-                && subscription.Routes.ContainsKey(eventType))
-            .ToArray();
+                && subscription.Routes.ContainsKey(eventType);
+        }
     }
 }

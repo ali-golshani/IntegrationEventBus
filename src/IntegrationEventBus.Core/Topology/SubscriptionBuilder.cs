@@ -15,7 +15,6 @@ public sealed class SubscriptionBuilder
     }
 
     internal string Name { get; }
-
     internal string Topic { get; }
 
     /// <summary>
@@ -48,8 +47,10 @@ public sealed class SubscriptionBuilder
         return this;
     }
 
-    internal SubscriptionDefinition Build() =>
-        new(Name, Topic, _retryPolicy, _routes);
+    internal SubscriptionDefinition Build()
+    {
+        return new(Name, Topic, _retryPolicy, _routes);
+    }
 
     private void AddRoute(Type eventType, Type? handlerType)
     {

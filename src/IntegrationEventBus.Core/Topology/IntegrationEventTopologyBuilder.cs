@@ -6,8 +6,7 @@ namespace IntegrationEventBus;
 public sealed class IntegrationEventTopologyBuilder
 {
     private readonly Dictionary<Type, IntegrationEventDefinition> _events = [];
-    private readonly Dictionary<string, SubscriptionBuilder> _subscriptions =
-        new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, SubscriptionBuilder> _subscriptions = new(StringComparer.OrdinalIgnoreCase);
 
     public IntegrationEventTopologyBuilder Event<TEvent>(string eventName, string topic)
         where TEvent : notnull

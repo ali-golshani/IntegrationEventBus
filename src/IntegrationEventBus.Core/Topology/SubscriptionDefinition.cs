@@ -18,14 +18,11 @@ public sealed class SubscriptionDefinition
         Name = name;
         Topic = topic;
         RetryPolicy = retryPolicy;
-        _routes = new ReadOnlyDictionary<Type, Type?>(
-            new Dictionary<Type, Type?>(routes));
+        _routes = new ReadOnlyDictionary<Type, Type?>(new Dictionary<Type, Type?>(routes));
     }
 
     public string Name { get; }
-
     public string Topic { get; }
-
     public RetryPolicy RetryPolicy { get; }
 
     /// <summary>

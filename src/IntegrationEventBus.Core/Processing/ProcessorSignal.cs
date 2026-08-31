@@ -4,7 +4,7 @@ namespace IntegrationEventBus;
 
 internal sealed class ProcessorSignal : IProcessorSignal
 {
-    private readonly object _gate = new();
+    private readonly Lock _gate = new();
     private TaskCompletionSource _nextPulse = CreateCompletionSource();
 
     public void Pulse()
@@ -31,6 +31,8 @@ internal sealed class ProcessorSignal : IProcessorSignal
         cancellationToken.ThrowIfCancellationRequested();
     }
 
-    private static TaskCompletionSource CreateCompletionSource() =>
-        new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private static TaskCompletionSource CreateCompletionSource()
+    {
+        return new(TaskCreationOptions.RunContinuationsAsynchronously);
+    }
 }

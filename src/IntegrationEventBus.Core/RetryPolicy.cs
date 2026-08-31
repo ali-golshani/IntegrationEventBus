@@ -9,7 +9,6 @@ public sealed record RetryPolicy
     public static RetryPolicy Default { get; } = new();
 
     public string Name { get; init; } = "default";
-
     public int Version { get; init; } = 1;
 
     /// <summary>

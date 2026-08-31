@@ -10,21 +10,17 @@ internal sealed class EmbeddedSqlScriptProvider : ISqlScriptProvider
 
     private static readonly Assembly ResourceAssembly = typeof(EmbeddedSqlScriptProvider).Assembly;
 
-    private static readonly IReadOnlyDictionary<SqlScript, string> ResourceNames =
-        new Dictionary<SqlScript, string>
-        {
-            [SqlScript.CreateSchema] = $"{ResourcePrefix}.Schema.CreateSchema.sql",
-            [SqlScript.InsertEvent] = $"{ResourcePrefix}.Publishing.InsertEvent.sql",
-            [SqlScript.InsertDelivery] = $"{ResourcePrefix}.Publishing.InsertDelivery.sql",
-            [SqlScript.AcquireSubscriptionLock] =
-                $"{ResourcePrefix}.Processing.AcquireSubscriptionLock.sql",
-            [SqlScript.ClaimNextDelivery] =
-                $"{ResourcePrefix}.Processing.ClaimNextDelivery.sql",
-            [SqlScript.MarkSucceeded] = $"{ResourcePrefix}.Processing.MarkSucceeded.sql",
-            [SqlScript.MarkFailed] = $"{ResourcePrefix}.Processing.MarkFailed.sql",
-            [SqlScript.ReleaseCancelledAttempt] =
-                $"{ResourcePrefix}.Processing.ReleaseCancelledAttempt.sql"
-        };
+    private static readonly Dictionary<SqlScript, string> ResourceNames = new()
+    {
+        [SqlScript.CreateSchema] = $"{ResourcePrefix}.Schema.CreateSchema.sql",
+        [SqlScript.InsertEvent] = $"{ResourcePrefix}.Publishing.InsertEvent.sql",
+        [SqlScript.InsertDelivery] = $"{ResourcePrefix}.Publishing.InsertDelivery.sql",
+        [SqlScript.AcquireSubscriptionLock] = $"{ResourcePrefix}.Processing.AcquireSubscriptionLock.sql",
+        [SqlScript.ClaimNextDelivery] = $"{ResourcePrefix}.Processing.ClaimNextDelivery.sql",
+        [SqlScript.MarkSucceeded] = $"{ResourcePrefix}.Processing.MarkSucceeded.sql",
+        [SqlScript.MarkFailed] = $"{ResourcePrefix}.Processing.MarkFailed.sql",
+        [SqlScript.ReleaseCancelledAttempt] = $"{ResourcePrefix}.Processing.ReleaseCancelledAttempt.sql"
+    };
 
     private readonly ConcurrentDictionary<SqlScript, string> _cache = new();
 
@@ -40,6 +36,7 @@ internal sealed class EmbeddedSqlScriptProvider : ISqlScriptProvider
         using var stream = ResourceAssembly.GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException(
                 $"Embedded SQL resource '{resourceName}' could not be found.");
+
         using var reader = new StreamReader(
             stream,
             Encoding.UTF8,
