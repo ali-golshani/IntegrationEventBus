@@ -4,18 +4,19 @@ public sealed class RetryPlannerTests
 {
     private static readonly DateTimeOffset Now = new(2026, 8, 30, 12, 0, 0, TimeSpan.Zero);
 
-    private static readonly RetryPolicy Policy = new()
-    {
-        ImmediateRetryDelays =
-        [
-            TimeSpan.FromSeconds(1),
-            TimeSpan.FromSeconds(5),
-            TimeSpan.FromSeconds(30)
-        ],
-        DeferredRetryDelay = TimeSpan.FromMinutes(15),
-        MaxAttempts = 10,
-        DeadLetterAfter = TimeSpan.FromHours(2)
-    };
+    private static readonly RetryPolicy Policy =
+        new RetryPolicy.LimitedImmediateRetries
+        {
+            ImmediateRetryDelays =
+            [
+                TimeSpan.FromSeconds(1),
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(30)
+            ],
+            DeferredRetryDelay = TimeSpan.FromMinutes(15),
+            MaxAttempts = 10,
+            DeadLetterAfter = TimeSpan.FromHours(2)
+        };
 
     [Theory]
     [InlineData(1, 1)]
@@ -45,7 +46,13 @@ public sealed class RetryPlannerTests
     [Fact]
     public void Empty_immediate_delays_defer_the_first_retry()
     {
-        var policy = Policy with { ImmediateRetryDelays = [] };
+        var policy = new RetryPolicy.LimitedImmediateRetries
+        {
+            ImmediateRetryDelays = [],
+            DeferredRetryDelay = TimeSpan.FromMinutes(15),
+            MaxAttempts = 10,
+            DeadLetterAfter = TimeSpan.FromHours(2)
+        };
 
         var decision = RetryPlanner.Plan(policy, 1, Now, Now);
 
@@ -57,11 +64,14 @@ public sealed class RetryPlannerTests
     [Fact]
     public void Last_immediate_delay_can_repeat_and_block_following_events()
     {
-        var policy = Policy with
+        var policy = new RetryPolicy.UnlimitedImmediateRetries
         {
-            RepeatLastImmediateRetryDelay = true,
-            MaxAttempts = RetryPolicy.UnlimitedAttempts,
-            DeadLetterAfter = null
+            ImmediateRetryDelays =
+            [
+                TimeSpan.FromSeconds(1),
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(30)
+            ]
         };
 
         var decision = RetryPlanner.Plan(policy, 100, Now, Now);
@@ -72,12 +82,11 @@ public sealed class RetryPlannerTests
     }
 
     [Fact]
-    public void Repeating_the_last_immediate_delay_requires_a_delay()
+    public void Unlimited_immediate_retries_require_a_delay()
     {
-        var policy = Policy with
+        var policy = new RetryPolicy.UnlimitedImmediateRetries
         {
-            ImmediateRetryDelays = [],
-            RepeatLastImmediateRetryDelay = true
+            ImmediateRetryDelays = []
         };
 
         Assert.Throws<InvalidOperationException>(() => RetryPlanner.Plan(policy, 1, Now, Now));
@@ -86,7 +95,13 @@ public sealed class RetryPlannerTests
     [Fact]
     public void Immediate_delays_cannot_be_negative()
     {
-        var policy = Policy with { ImmediateRetryDelays = [TimeSpan.FromSeconds(-1)] };
+        var policy = new RetryPolicy.LimitedImmediateRetries
+        {
+            ImmediateRetryDelays = [TimeSpan.FromSeconds(-1)],
+            DeferredRetryDelay = TimeSpan.FromMinutes(15),
+            MaxAttempts = 10,
+            DeadLetterAfter = TimeSpan.FromHours(2)
+        };
 
         Assert.Throws<InvalidOperationException>(() => RetryPlanner.Plan(policy, 1, Now, Now));
     }
