@@ -2,14 +2,9 @@ namespace IntegrationEventBus.SqlServer;
 
 public sealed class SqlServerIntegrationEventBusOptions
 {
-    public bool AutoCreateSchema { get; set; } = true;
-
     public TimeSpan PollingInterval { get; set; } = TimeSpan.FromSeconds(5);
-
     public TimeSpan LockRetryInterval { get; set; } = TimeSpan.FromSeconds(15);
-
     public int CommandTimeoutSeconds { get; set; } = 30;
-
     internal string ConnectionString { get; set; } = string.Empty;
 
     internal void Validate()

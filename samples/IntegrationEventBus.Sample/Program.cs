@@ -1,4 +1,5 @@
 using IntegrationEventBus;
+using IntegrationEventBus.SqlServer;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -31,7 +32,9 @@ builder.Services
     .UseSqlServer(connectionString)
     .AddHostedProcessor();
 
-await builder.Build().RunAsync();
+var host = builder.Build();
+await host.Services.GetRequiredService<SqlServerIntegrationEventBusMigrator>().MigrateAsync();
+await host.RunAsync();
 
 internal sealed record OrderPlaced(Guid OrderId, decimal Total);
 

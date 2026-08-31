@@ -27,8 +27,7 @@ key whenever the external system supports one.
 | `IntegrationEventBus.Hosting` | Generic Host background processor |
 
 SQL Server commands are stored as embedded `.sql` resources inside the provider package. Runtime
-values are parameterized; only the validated schema identifier is substituted by the internal
-script loader.
+values are parameterized and the database objects use the fixed `cap` schema.
 
 ## Configuration
 
@@ -105,8 +104,18 @@ is not recalculated during application startup.
 
 ## Database
 
-By default the provider creates the `cap` schema and the `Events` and `Deliveries`
-tables on first use. Set `AutoCreateSchema` to `false` when database objects are managed through a
-separate deployment process.
+Database migration is explicit and is never checked or executed during publishing or processing.
+Run it once at an appropriate point during application deployment or startup:
+
+```csharp
+var host = builder.Build();
+await host.Services
+    .GetRequiredService<SqlServerIntegrationEventBusMigrator>()
+    .MigrateAsync();
+await host.RunAsync();
+```
+
+The migration creates the `cap` schema and its `Events` and `Deliveries` tables when missing. If
+the migration has not been run, normal SQL operations fail with the corresponding SQL Server error.
 
 See `samples/IntegrationEventBus.Sample` for a complete Generic Host example.

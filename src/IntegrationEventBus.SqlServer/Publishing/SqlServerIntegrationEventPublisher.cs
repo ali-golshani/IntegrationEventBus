@@ -9,7 +9,6 @@ internal sealed class SqlServerIntegrationEventPublisher(
     IntegrationEventTopology topology,
     IIntegrationEventSerializer serializer,
     SqlServerIntegrationEventBusOptions options,
-    SqlServerStoreInitializer initializer,
     ISqlScriptProvider scripts,
     IProcessorSignal processorSignal)
     : IIntegrationEventPublisher
@@ -38,8 +37,6 @@ internal sealed class SqlServerIntegrationEventPublisher(
         {
             throw new InvalidOperationException("The supplied SQL transaction connection is not open.");
         }
-
-        await initializer.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
         var definition = topology.GetEvent(typeof(TEvent));
         var subscriptions = topology.GetSubscriptions(typeof(TEvent), definition.Topic);

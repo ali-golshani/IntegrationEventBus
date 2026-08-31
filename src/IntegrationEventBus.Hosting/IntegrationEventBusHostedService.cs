@@ -6,7 +6,6 @@ namespace IntegrationEventBus;
 
 internal sealed class IntegrationEventBusHostedService(
     IntegrationEventTopology topology,
-    IIntegrationEventStoreInitializer storeInitializer,
     ISubscriptionRunner subscriptionRunner,
     ILogger<IntegrationEventBusHostedService> logger)
     : BackgroundService
@@ -18,7 +17,6 @@ internal sealed class IntegrationEventBusHostedService(
             .ToArray();
 
         ValidateHandlers(subscriptions);
-        await storeInitializer.InitializeAsync(stoppingToken).ConfigureAwait(false);
 
         if (subscriptions.Length == 0)
         {

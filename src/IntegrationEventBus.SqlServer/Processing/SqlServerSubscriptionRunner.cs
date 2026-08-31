@@ -9,7 +9,6 @@ namespace IntegrationEventBus.SqlServer;
 
 internal sealed class SqlServerSubscriptionRunner(
     SqlServerIntegrationEventBusOptions options,
-    SqlServerStoreInitializer initializer,
     IIntegrationEventDispatcher dispatcher,
     IProcessorSignal processorSignal,
     ISqlScriptProvider scripts,
@@ -21,8 +20,6 @@ internal sealed class SqlServerSubscriptionRunner(
         string processorId,
         CancellationToken cancellationToken)
     {
-        await initializer.InitializeAsync(cancellationToken).ConfigureAwait(false);
-
         while (!cancellationToken.IsCancellationRequested)
         {
             try
