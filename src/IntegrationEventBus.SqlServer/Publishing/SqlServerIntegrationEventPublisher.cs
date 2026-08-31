@@ -9,10 +9,12 @@ internal sealed class SqlServerIntegrationEventPublisher(
     IntegrationEventTopology topology,
     IIntegrationEventSerializer serializer,
     SqlServerIntegrationEventBusOptions options,
-    ISqlScriptProvider scripts,
     IProcessorSignal processorSignal)
     : IIntegrationEventPublisher
 {
+    private static readonly string InsertDeliveryQuery = Properties.Resources.InsertDelivery;
+    private static readonly string InsertEventQuery = Properties.Resources.InsertEvent;
+
     public async ValueTask<Guid> PublishAsync<TEvent>(
         TEvent integrationEvent,
         DbTransaction transaction,
@@ -97,7 +99,7 @@ internal sealed class SqlServerIntegrationEventPublisher(
         await using var command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandTimeout = options.CommandTimeoutSeconds;
-        command.CommandText = scripts.Get(SqlScript.InsertEvent);
+        command.CommandText = InsertEventQuery;
 
         command.Parameters.Add(new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = eventId });
         command.Parameters.Add(new SqlParameter("@EventName", SqlDbType.NVarChar, 200) { Value = definition.EventName });
@@ -126,7 +128,7 @@ internal sealed class SqlServerIntegrationEventPublisher(
         await using var command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandTimeout = options.CommandTimeoutSeconds;
-        command.CommandText = scripts.Get(SqlScript.InsertDelivery);
+        command.CommandText = InsertDeliveryQuery;
 
         command.Parameters.Add(new SqlParameter("@EventId", SqlDbType.UniqueIdentifier) { Value = eventId });
         command.Parameters.Add(new SqlParameter("@SubscriptionName", SqlDbType.NVarChar, 200) { Value = subscription.Name });

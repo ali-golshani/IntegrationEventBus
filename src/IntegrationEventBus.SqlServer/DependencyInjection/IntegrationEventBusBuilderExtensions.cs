@@ -23,11 +23,9 @@ public static class SqlServerIntegrationEventBusBuilderExtensions
         options.Validate();
 
         builder.Services.AddSingleton(options);
-        builder.Services.TryAddSingleton<ISqlScriptProvider, EmbeddedSqlScriptProvider>();
         builder.Services.TryAddSingleton(static provider =>
             new SqlServerIntegrationEventBusMigrator(
-                provider.GetRequiredService<SqlServerIntegrationEventBusOptions>(),
-                provider.GetRequiredService<ISqlScriptProvider>()));
+                provider.GetRequiredService<SqlServerIntegrationEventBusOptions>()));
         builder.Services.TryAddSingleton<IIntegrationEventPublisher, SqlServerIntegrationEventPublisher>();
         builder.Services.TryAddSingleton<ISubscriptionRunner, SqlServerSubscriptionRunner>();
 

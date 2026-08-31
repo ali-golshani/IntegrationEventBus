@@ -31,7 +31,7 @@ namespace IntegrationEventBus.SqlServer.Properties {
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -57,6 +57,54 @@ namespace IntegrationEventBus.SqlServer.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+
+        internal static string AcquireSubscriptionLock {
+            get {
+                return ResourceManager.GetString("AcquireSubscriptionLock", resourceCulture);
+            }
+        }
+
+        internal static string ClaimNextDelivery {
+            get {
+                return ResourceManager.GetString("ClaimNextDelivery", resourceCulture);
+            }
+        }
+
+        internal static string CreateSchema {
+            get {
+                return ResourceManager.GetString("CreateSchema", resourceCulture);
+            }
+        }
+
+        internal static string InsertDelivery {
+            get {
+                return ResourceManager.GetString("InsertDelivery", resourceCulture);
+            }
+        }
+
+        internal static string InsertEvent {
+            get {
+                return ResourceManager.GetString("InsertEvent", resourceCulture);
+            }
+        }
+
+        internal static string MarkFailed {
+            get {
+                return ResourceManager.GetString("MarkFailed", resourceCulture);
+            }
+        }
+
+        internal static string MarkSucceeded {
+            get {
+                return ResourceManager.GetString("MarkSucceeded", resourceCulture);
+            }
+        }
+
+        internal static string ReleaseCancelledAttempt {
+            get {
+                return ResourceManager.GetString("ReleaseCancelledAttempt", resourceCulture);
             }
         }
     }

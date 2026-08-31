@@ -11,10 +11,15 @@ internal sealed class SqlServerSubscriptionRunner(
     SqlServerIntegrationEventBusOptions options,
     IIntegrationEventDispatcher dispatcher,
     IProcessorSignal processorSignal,
-    ISqlScriptProvider scripts,
     ILogger<SqlServerSubscriptionRunner> logger)
     : ISubscriptionRunner
 {
+    private static readonly string AcquireSubscriptionLockQuery = Properties.Resources.AcquireSubscriptionLock;
+    private static readonly string ClaimNextDeliveryQuery = Properties.Resources.ClaimNextDelivery;
+    private static readonly string MarkFailedQuery = Properties.Resources.MarkFailed;
+    private static readonly string MarkSucceededQuery = Properties.Resources.MarkSucceeded;
+    private static readonly string ReleaseCancelledAttemptQuery = Properties.Resources.ReleaseCancelledAttempt;
+
     public async Task RunAsync(
         SubscriptionDefinition subscription,
         string processorId,
@@ -33,6 +38,7 @@ internal sealed class SqlServerSubscriptionRunner(
                         "Processor {ProcessorId} could not acquire the lock for subscription {Subscription}.",
                         processorId,
                         subscription.Name);
+
                     await processorSignal.WaitAsync(options.LockRetryInterval, cancellationToken)
                         .ConfigureAwait(false);
                     continue;
@@ -154,7 +160,7 @@ internal sealed class SqlServerSubscriptionRunner(
 
         await using var command = connection.CreateCommand();
         command.CommandTimeout = options.CommandTimeoutSeconds;
-        command.CommandText = scripts.Get(SqlScript.AcquireSubscriptionLock);
+        command.CommandText = AcquireSubscriptionLockQuery;
         command.Parameters.Add(new SqlParameter("@Resource", SqlDbType.NVarChar, 255) { Value = resource });
 
         var result = (int)(await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false)
@@ -187,7 +193,7 @@ internal sealed class SqlServerSubscriptionRunner(
         await using var command = connection.CreateCommand();
         command.Transaction = (SqlTransaction)transaction;
         command.CommandTimeout = options.CommandTimeoutSeconds;
-        command.CommandText = scripts.Get(SqlScript.ClaimNextDelivery);
+        command.CommandText = ClaimNextDeliveryQuery;
 
         command.Parameters.Add(new SqlParameter("@SubscriptionName", SqlDbType.NVarChar, 200) { Value = subscriptionName });
         command.Parameters.Add(new SqlParameter("@Pending", SqlDbType.TinyInt) { Value = (byte)DeliveryStatus.Pending });
@@ -226,7 +232,7 @@ internal sealed class SqlServerSubscriptionRunner(
         CancellationToken cancellationToken) =>
         ExecuteDeliveryUpdateAsync(
             connection,
-            SqlScript.MarkSucceeded,
+            MarkSucceededQuery,
             deliveryId,
             command =>
             {
@@ -258,7 +264,7 @@ internal sealed class SqlServerSubscriptionRunner(
 
         return ExecuteDeliveryUpdateAsync(
             connection,
-            SqlScript.MarkFailed,
+            MarkFailedQuery,
             deliveryId,
             command =>
             {
@@ -298,7 +304,7 @@ internal sealed class SqlServerSubscriptionRunner(
         CancellationToken cancellationToken) =>
         ExecuteDeliveryUpdateAsync(
             connection,
-            SqlScript.ReleaseCancelledAttempt,
+            ReleaseCancelledAttemptQuery,
             deliveryId,
             command => command.Parameters.Add(
                 new SqlParameter("@NowUtc", SqlDbType.DateTimeOffset) { Value = DateTimeOffset.UtcNow }),
@@ -306,14 +312,14 @@ internal sealed class SqlServerSubscriptionRunner(
 
     private async Task ExecuteDeliveryUpdateAsync(
         SqlConnection connection,
-        SqlScript script,
+        string commandText,
         long deliveryId,
         Action<SqlCommand> addParameters,
         CancellationToken cancellationToken)
     {
         await using var command = connection.CreateCommand();
         command.CommandTimeout = options.CommandTimeoutSeconds;
-        command.CommandText = scripts.Get(script);
+        command.CommandText = commandText;
         command.Parameters.Add(new SqlParameter("@DeliveryId", SqlDbType.BigInt) { Value = deliveryId });
         addParameters(command);
         await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
