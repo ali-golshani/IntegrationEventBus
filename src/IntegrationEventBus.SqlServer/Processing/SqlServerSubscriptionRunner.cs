@@ -157,10 +157,9 @@ internal sealed class SqlServerSubscriptionRunner(
     {
         var nowUtc = DateTimeOffset.UtcNow;
 
-        await using var transaction =
-            await connection.BeginTransactionAsync(
-                IsolationLevel.ReadCommitted,
-                cancellationToken)
+        await using var transaction = await connection.BeginTransactionAsync(
+            IsolationLevel.ReadCommitted,
+            cancellationToken)
             .ConfigureAwait(false);
 
         await using var command = connection.CreateCommand();

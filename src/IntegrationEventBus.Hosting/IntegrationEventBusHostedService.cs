@@ -12,7 +12,8 @@ internal sealed class IntegrationEventBusHostedService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var subscriptions = topology.Subscriptions
+        var subscriptions =
+            topology.Subscriptions
             .Where(static subscription => subscription.HasHandlers)
             .ToArray();
 
@@ -26,16 +27,12 @@ internal sealed class IntegrationEventBusHostedService(
         }
 
         var processorId = CreateProcessorId();
-        HostingLog.ProcessorStarting(
-            logger,
-            processorId,
-            subscriptions.Length);
 
-        var loops = subscriptions
-            .Select(subscription => subscriptionRunner.RunAsync(
-                subscription,
-                processorId,
-                stoppingToken))
+        HostingLog.ProcessorStarting(logger, processorId, subscriptions.Length);
+
+        var loops =
+            subscriptions
+            .Select(subscription => subscriptionRunner.RunAsync(subscription, processorId, stoppingToken))
             .ToArray();
 
         await Task.WhenAll(loops).ConfigureAwait(false);
@@ -45,7 +42,8 @@ internal sealed class IntegrationEventBusHostedService(
     {
         foreach (var subscription in subscriptions)
         {
-            var missingHandlers = subscription.Routes
+            var missingHandlers =
+                subscription.Routes
                 .Where(static route => route.Value is null)
                 .Select(static route => route.Key.FullName ?? route.Key.Name)
                 .ToArray();
@@ -59,6 +57,8 @@ internal sealed class IntegrationEventBusHostedService(
         }
     }
 
-    private static string CreateProcessorId() =>
-        $"{Environment.MachineName}:{Environment.ProcessId}:{Guid.NewGuid():N}";
+    private static string CreateProcessorId()
+    {
+        return $"{Environment.MachineName}:{Environment.ProcessId}:{Guid.NewGuid():N}";
+    }
 }

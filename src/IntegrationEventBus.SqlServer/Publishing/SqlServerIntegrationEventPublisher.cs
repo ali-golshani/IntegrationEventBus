@@ -29,7 +29,8 @@ internal sealed class SqlServerIntegrationEventPublisher(
                 nameof(transaction));
         }
 
-        var connection = sqlTransaction.Connection
+        var connection = 
+            sqlTransaction.Connection
             ?? throw new InvalidOperationException("The supplied SQL transaction is no longer active.");
 
         if (connection.State != ConnectionState.Open)
