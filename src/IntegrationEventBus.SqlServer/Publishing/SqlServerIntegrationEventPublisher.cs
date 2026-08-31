@@ -39,6 +39,7 @@ internal sealed class SqlServerIntegrationEventPublisher(
 
         var definition = topology.GetEvent(typeof(TEvent));
         var subscriptions = topology.GetSubscriptions(typeof(TEvent), definition.Topic);
+
         var eventId = publishOptions?.EventId ?? Guid.NewGuid();
         if (eventId == Guid.Empty)
         {
@@ -46,6 +47,7 @@ internal sealed class SqlServerIntegrationEventPublisher(
         }
 
         var occurredAtUtc = (publishOptions?.OccurredAtUtc ?? DateTimeOffset.UtcNow).ToUniversalTime();
+
         var correlationId = publishOptions?.CorrelationId;
         if (correlationId?.Length > 200)
         {
@@ -53,6 +55,7 @@ internal sealed class SqlServerIntegrationEventPublisher(
         }
 
         var payloadJson = serializer.Serialize(integrationEvent, typeof(TEvent));
+
         await InsertEventAsync(
                 connection,
                 sqlTransaction,

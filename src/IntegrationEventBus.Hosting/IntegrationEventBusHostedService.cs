@@ -20,14 +20,14 @@ internal sealed class IntegrationEventBusHostedService(
 
         if (subscriptions.Length == 0)
         {
-            logger.LogInformation("IntegrationEventBus processor has no local subscriptions to run.");
+            HostingLog.NoLocalSubscriptions(logger);
             await Task.Delay(Timeout.InfiniteTimeSpan, stoppingToken).ConfigureAwait(false);
             return;
         }
 
         var processorId = CreateProcessorId();
-        logger.LogInformation(
-            "IntegrationEventBus processor {ProcessorId} is starting {SubscriptionCount} subscription loops.",
+        HostingLog.ProcessorStarting(
+            logger,
             processorId,
             subscriptions.Length);
 

@@ -28,23 +28,15 @@ internal sealed class SqlServerSubscriptionRunner(
 
                 if (!await TryAcquireLockAsync(connection, subscription, cancellationToken).ConfigureAwait(false))
                 {
-                    logger.LogDebug(
-                        "Processor {ProcessorId} could not acquire the lock for subscription {Subscription}.",
-                        processorId,
-                        subscription.Name);
+                    SqlServerLog.SubscriptionLockUnavailable(logger, processorId, subscription.Name);
 
-                    await processorSignal.WaitAsync(options.LockRetryInterval, cancellationToken)
-                        .ConfigureAwait(false);
+                    await processorSignal.WaitAsync(options.LockRetryInterval, cancellationToken).ConfigureAwait(false);
                     continue;
                 }
 
-                logger.LogInformation(
-                    "Processor {ProcessorId} acquired the lock for subscription {Subscription}.",
-                    processorId,
-                    subscription.Name);
+                SqlServerLog.SubscriptionLockAcquired(logger, processorId, subscription.Name);
 
-                await ProcessUnderLockAsync(connection, subscription, cancellationToken)
-                    .ConfigureAwait(false);
+                await ProcessUnderLockAsync(connection, subscription, cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -52,12 +44,9 @@ internal sealed class SqlServerSubscriptionRunner(
             }
             catch (Exception exception)
             {
-                logger.LogError(
-                    exception,
-                    "Subscription {Subscription} processor failed and will reconnect.",
-                    subscription.Name);
-                await processorSignal.WaitAsync(options.LockRetryInterval, cancellationToken)
-                    .ConfigureAwait(false);
+                SqlServerLog.SubscriptionProcessorFailed(logger, exception, subscription.Name);
+
+                await processorSignal.WaitAsync(options.LockRetryInterval, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -69,39 +58,31 @@ internal sealed class SqlServerSubscriptionRunner(
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            var delivery = await TryClaimNextAsync(connection, subscription.Name, cancellationToken)
-                .ConfigureAwait(false);
+            var delivery = await TryClaimNextAsync(connection, subscription.Name, cancellationToken).ConfigureAwait(false);
 
             if (delivery is null)
             {
-                await processorSignal.WaitAsync(options.PollingInterval, cancellationToken)
-                    .ConfigureAwait(false);
+                await processorSignal.WaitAsync(options.PollingInterval, cancellationToken).ConfigureAwait(false);
                 continue;
             }
 
             try
             {
-                await dispatcher.DispatchAsync(delivery, subscription, cancellationToken)
-                    .ConfigureAwait(false);
-                await MarkSucceededAsync(connection, delivery.DeliveryId, cancellationToken)
-                    .ConfigureAwait(false);
+                await dispatcher.DispatchAsync(delivery, subscription, cancellationToken).ConfigureAwait(false);
+                await MarkSucceededAsync(connection, delivery.DeliveryId, cancellationToken).ConfigureAwait(false);
 
-                logger.LogDebug(
-                    "Event {EventId} succeeded for subscription {Subscription} on attempt {Attempt}.",
-                    delivery.EventId,
-                    subscription.Name,
-                    delivery.Attempt);
+                SqlServerLog.DeliverySucceeded(logger, delivery.EventId, subscription.Name, delivery.Attempt);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                await ReleaseCancelledAttemptAsync(connection, delivery.DeliveryId, cancellationToken: default)
-                    .ConfigureAwait(false);
+                await ReleaseCancelledAttemptAsync(connection, delivery.DeliveryId, cancellationToken: default).ConfigureAwait(false);
                 throw;
             }
             catch (Exception exception)
             {
                 var nowUtc = DateTimeOffset.UtcNow;
                 var firstFailedAtUtc = delivery.FirstFailedAtUtc ?? nowUtc;
+
                 var decision = RetryPlanner.Plan(
                     subscription.RetryPolicy,
                     delivery.Attempt,
@@ -120,19 +101,18 @@ internal sealed class SqlServerSubscriptionRunner(
 
                 if (decision.IsDeadLetter)
                 {
-                    logger.LogError(
+                    SqlServerLog.DeliveryDeadLettered(
+                        logger,
                         exception,
-                        "Event {EventId} was dead-lettered for subscription {Subscription} after {Attempt} attempts.",
                         delivery.EventId,
                         subscription.Name,
                         delivery.Attempt);
                 }
                 else
                 {
-                    logger.LogWarning(
+                    SqlServerLog.DeliveryFailed(
+                        logger,
                         exception,
-                        "Event {EventId} failed for subscription {Subscription} on attempt {Attempt}; " +
-                        "next attempt is {NextAttemptAtUtc} and blocking is {BlocksFollowingEvents}.",
                         delivery.EventId,
                         subscription.Name,
                         delivery.Attempt,
@@ -154,10 +134,7 @@ internal sealed class SqlServerSubscriptionRunner(
 
         await using var command = connection.CreateCommand();
         command.CommandTimeout = options.CommandTimeoutSeconds;
-        var result = await SqlServerQueries.AcquireSubscriptionLockAsync(
-            command,
-            resource,
-            cancellationToken);
+        var result = await SqlServerQueries.AcquireSubscriptionLockAsync(command, resource, cancellationToken);
 
         if (result == -1)
         {
@@ -180,10 +157,12 @@ internal sealed class SqlServerSubscriptionRunner(
     {
         var nowUtc = DateTimeOffset.UtcNow;
 
-        await using var transaction = await connection.BeginTransactionAsync(
+        await using var transaction =
+            await connection.BeginTransactionAsync(
                 IsolationLevel.ReadCommitted,
                 cancellationToken)
             .ConfigureAwait(false);
+
         await using var command = connection.CreateCommand();
         command.Transaction = (SqlTransaction)transaction;
         command.CommandTimeout = options.CommandTimeoutSeconds;
