@@ -1,4 +1,5 @@
 using IntegrationEventBus;
+using IntegrationEventBus.Sample;
 using IntegrationEventBus.SqlServer;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 const string connectionString =
-    "Server=.;Database=IntegrationEventBusSample;Integrated Security=True;TrustServerCertificate=True;";
+    "Server=.;Database=IntegrationEventBusSample;User Id=golshani;Password=Ali_Golshani;TrustServerCertificate=True;";
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -32,51 +33,10 @@ builder.Services
     .UseSqlServer(connectionString)
     .AddHostedProcessor();
 
-var host = builder.Build();
-await host.Services.GetRequiredService<SqlServerIntegrationEventBusMigrator>().MigrateAsync();
-await host.RunAsync();
+builder.Services.AddHostedService<ApplicationHostedService>();
 
-internal sealed record OrderPlaced(Guid OrderId, decimal Total);
+var app = builder.Build();
 
-internal sealed class OrderPlacedHandler(ILogger<OrderPlacedHandler> logger)
-    : IIntegrationEventHandler<OrderPlaced>
-{
-    public ValueTask HandleAsync(
-        OrderPlaced integrationEvent,
-        IntegrationEventContext context,
-        CancellationToken cancellationToken)
-    {
-        logger.LogInformation(
-            "Handling order {OrderId}; event {EventId}; attempt {Attempt}.",
-            integrationEvent.OrderId,
-            context.EventId,
-            context.Attempt);
+//await app.Services.GetRequiredService<SqlServerIntegrationEventBusMigrator>().MigrateAsync();
 
-        return ValueTask.CompletedTask;
-    }
-}
-
-internal static class ProducerExample
-{
-    public static async Task<Guid> PublishAsync(
-        IServiceProvider services,
-        string connectionString,
-        OrderPlaced integrationEvent,
-        CancellationToken cancellationToken)
-    {
-        await using var connection = new SqlConnection(connectionString);
-        await connection.OpenAsync(cancellationToken);
-        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
-
-        // Save business data here using the same connection and transaction.
-        var publisher = services.GetRequiredService<IIntegrationEventPublisher>();
-        var eventId = await publisher.PublishAsync(
-            integrationEvent,
-            transaction,
-            new PublishOptions { CorrelationId = integrationEvent.OrderId.ToString("N") },
-            cancellationToken);
-
-        await transaction.CommitAsync(cancellationToken);
-        return eventId;
-    }
-}
+await app.RunAsync();
