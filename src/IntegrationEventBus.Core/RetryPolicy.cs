@@ -6,17 +6,29 @@ namespace IntegrationEventBus;
 /// </summary>
 public sealed record RetryPolicy
 {
+    public const int UnlimitedAttempts = int.MaxValue;
+
     public static RetryPolicy Default { get; } = new();
 
     public string Name { get; init; } = "default";
     public int Version { get; init; } = 1;
 
     /// <summary>
-    /// Gets the number of short-delay retries that block later events in the subscription.
+    /// Gets the delay for each immediate retry. Immediate retries block later events in the
+    /// subscription.
     /// </summary>
-    public int ImmediateRetryCount { get; init; } = 3;
+    public TimeSpan[] ImmediateRetryDelays { get; init; } =
+    [
+        TimeSpan.FromSeconds(1),
+        TimeSpan.FromSeconds(5),
+        TimeSpan.FromSeconds(10)
+    ];
 
-    public TimeSpan ImmediateRetryDelay { get; init; } = TimeSpan.FromSeconds(5);
+    /// <summary>
+    /// Gets a value indicating whether the last immediate retry delay is repeated after all
+    /// configured immediate retry delays have been used.
+    /// </summary>
+    public bool RepeatLastImmediateRetryDelay { get; init; }
 
     /// <summary>
     /// Gets the delay used after immediate retries are exhausted. Deferred retries do not block
@@ -47,14 +59,21 @@ public sealed record RetryPolicy
             throw new InvalidOperationException($"Retry policy '{Name}' must have a positive version.");
         }
 
-        if (ImmediateRetryCount < 0)
+        if (ImmediateRetryDelays is null)
         {
-            throw new InvalidOperationException($"Retry policy '{Name}' cannot have a negative immediate retry count.");
+            throw new InvalidOperationException($"Retry policy '{Name}' must define immediate retry delays.");
         }
 
-        if (ImmediateRetryDelay < TimeSpan.Zero || DeferredRetryDelay < TimeSpan.Zero)
+        if (ImmediateRetryDelays.Any(static delay => delay < TimeSpan.Zero)
+            || DeferredRetryDelay < TimeSpan.Zero)
         {
             throw new InvalidOperationException($"Retry policy '{Name}' cannot have a negative delay.");
+        }
+
+        if (RepeatLastImmediateRetryDelay && ImmediateRetryDelays.Length == 0)
+        {
+            throw new InvalidOperationException(
+                $"Retry policy '{Name}' must define an immediate retry delay before it can be repeated.");
         }
 
         if (MaxAttempts < 1)

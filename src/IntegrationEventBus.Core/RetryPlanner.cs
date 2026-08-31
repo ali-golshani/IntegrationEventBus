@@ -32,7 +32,7 @@ public static class RetryPlanner
             throw new ArgumentOutOfRangeException(nameof(firstFailedAtUtc));
         }
 
-        var lifetimeExpired = 
+        var lifetimeExpired =
             policy.DeadLetterAfter is { } lifetime
             && nowUtc - firstFailedAtUtc >= lifetime;
 
@@ -41,14 +41,29 @@ public static class RetryPlanner
             return new RetryDecision(true, false, null);
         }
 
-        var isImmediateRetry = failedAttempt <= policy.ImmediateRetryCount;
-        var delay = isImmediateRetry
-            ? policy.ImmediateRetryDelay
-            : policy.DeferredRetryDelay;
+        var immediateDelay = GetImmediateRetryDelay(policy, failedAttempt);
+        var isImmediateRetry = immediateDelay is not null;
+        var delay = immediateDelay ?? policy.DeferredRetryDelay;
 
         return new RetryDecision(
             IsDeadLetter: false,
             BlocksFollowingEvents: isImmediateRetry,
             NextAttemptAtUtc: nowUtc + delay);
+    }
+
+    private static TimeSpan? GetImmediateRetryDelay(RetryPolicy policy, int failedAttempt)
+    {
+        var immediateRetryIndex = failedAttempt - 1;
+
+        if (immediateRetryIndex < policy.ImmediateRetryDelays.Length)
+        {
+            return policy.ImmediateRetryDelays[immediateRetryIndex];
+        }
+
+        var isImmediateRetry =
+            policy.RepeatLastImmediateRetryDelay
+            && policy.ImmediateRetryDelays.Length > 0;
+
+        return isImmediateRetry ? policy.ImmediateRetryDelays[^1] : null;
     }
 }

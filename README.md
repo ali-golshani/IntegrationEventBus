@@ -44,11 +44,15 @@ services
             {
                 Name = "external-api",
                 Version = 1,
-                ImmediateRetryCount = 3,
-                ImmediateRetryDelay = TimeSpan.FromSeconds(5),
-                DeferredRetryDelay = TimeSpan.FromMinutes(15),
-                MaxAttempts = 20,
-                DeadLetterAfter = TimeSpan.FromHours(6)
+                ImmediateRetryDelays =
+                [
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(30)
+                ],
+                RepeatLastImmediateRetryDelay = true,
+                MaxAttempts = RetryPolicy.UnlimitedAttempts,
+                DeadLetterAfter = null
             });
         });
     })
@@ -101,6 +105,10 @@ The retry definition remains in application configuration. SQL Server persists t
 
 Changing a policy affects the next failure calculation. An already persisted `NextAttemptAtUtc`
 is not recalculated during application startup.
+
+Set `RepeatLastImmediateRetryDelay` to `true`, `MaxAttempts` to
+`RetryPolicy.UnlimitedAttempts`, and `DeadLetterAfter` to `null` to keep retrying the blocking event
+with the final immediate delay. Later events in the subscription remain blocked until it succeeds.
 
 ## Database
 
