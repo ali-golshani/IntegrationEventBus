@@ -25,20 +25,17 @@ internal static class ProducerExample
         topology.Subscription("billing", "orders", subscription =>
         {
             subscription.Handle<OrderPlaced, OrderPlacedHandler>();
-            subscription.UseRetryPolicy(new RetryPolicy
-            {
-                Name = "external-api",
-                Version = 1,
-                ImmediateRetryDelays =
+            subscription.UseRetryPolicy(
+                RetryPolicyBuilder.UnlimitedImmediateRetries(
                 [
                     TimeSpan.FromSeconds(1),
                     TimeSpan.FromSeconds(5),
                     TimeSpan.FromSeconds(30)
-                ],
-                RepeatLastImmediateRetryDelay = true,
-                MaxAttempts = RetryPolicy.UnlimitedAttempts,
-                DeadLetterAfter = null
-            });
+                ]) with
+                {
+                    Name = "external-api",
+                    Version = 1
+                });
         });
     }
 
