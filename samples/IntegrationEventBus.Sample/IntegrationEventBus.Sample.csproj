@@ -5,9 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\IntegrationEventBus.Core\IntegrationEventBus.Core.csproj" />
-    <ProjectReference Include="..\..\src\IntegrationEventBus.Hosting\IntegrationEventBus.Hosting.csproj" />
-    <ProjectReference Include="..\..\src\IntegrationEventBus.SqlServer\IntegrationEventBus.SqlServer.csproj" />
+    <ProjectReference Include="..\..\src\IntegrationEventBus\IntegrationEventBus.csproj" />
   </ItemGroup>
 
   <ItemGroup>

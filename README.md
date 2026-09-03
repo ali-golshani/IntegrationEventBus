@@ -21,10 +21,7 @@ key whenever the external system supports one.
 
 | Project | Responsibility |
 | --- | --- |
-| `IntegrationEventBus.Abstractions` | Publisher, handler, context, and publish contracts |
-| `IntegrationEventBus.Core` | Explicit topology, serialization, dispatch, and retry planning |
-| `IntegrationEventBus.SqlServer` | Transactional publisher, schema, delivery state, polling, and locks |
-| `IntegrationEventBus.Hosting` | Generic Host background processor |
+| `IntegrationEventBus` | Contracts, topology, SQL Server persistence, processing, and Generic Host integration |
 
 SQL Server commands are stored as embedded `.sql` resources inside the provider package. Runtime
 values are parameterized and the database objects use the fixed `cap` schema.
@@ -114,7 +111,7 @@ Run it once at an appropriate point during application deployment or startup:
 ```csharp
 var host = builder.Build();
 await host.Services
-    .GetRequiredService<SqlServerIntegrationEventBusMigrator>()
+    .GetRequiredService<EventBusMigrator>()
     .MigrateAsync();
 await host.RunAsync();
 ```

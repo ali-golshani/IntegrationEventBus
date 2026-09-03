@@ -10,6 +10,6 @@ builder.Services.AddHostedService<ApplicationHostedService>();
 
 var app = builder.Build();
 
-//await app.Services.GetRequiredService<SqlServerIntegrationEventBusMigrator>().MigrateAsync();
+//await app.Services.GetRequiredService<EventBusMigrator>().MigrateAsync();
 
 await app.RunAsync();

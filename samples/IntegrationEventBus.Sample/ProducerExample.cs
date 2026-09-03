@@ -1,6 +1,5 @@
-using IntegrationEventBus.Abstractions;
-using IntegrationEventBus.Core;
-using IntegrationEventBus.Core.Topology;
+using IntegrationEventBus;
+using IntegrationEventBus.Topology;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 

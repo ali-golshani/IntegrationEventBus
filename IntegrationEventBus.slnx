@@ -3,12 +3,9 @@
     <Project Path="samples/IntegrationEventBus.Sample/IntegrationEventBus.Sample.csproj" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/IntegrationEventBus.Abstractions/IntegrationEventBus.Abstractions.csproj" />
-    <Project Path="src/IntegrationEventBus.Core/IntegrationEventBus.Core.csproj" />
-    <Project Path="src/IntegrationEventBus.Hosting/IntegrationEventBus.Hosting.csproj" />
-    <Project Path="src/IntegrationEventBus.SqlServer/IntegrationEventBus.SqlServer.csproj" />
+    <Project Path="src/IntegrationEventBus/IntegrationEventBus.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/IntegrationEventBus.Core.Tests/IntegrationEventBus.Core.Tests.csproj" />
+    <Project Path="tests/IntegrationEventBus.Tests/IntegrationEventBus.Tests.csproj" />
   </Folder>
 </Solution>
