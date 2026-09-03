@@ -7,9 +7,9 @@ namespace IntegrationEventBus.Sample;
 
 internal static class ProducerExample
 {
-    private const string connectionString = "Server=.;Database=IntegrationEventBusSample;Integrated Security=True;TrustServerCertificate=True;";
-
-    public static void AddIntegrationEventBus(this IServiceCollection services)
+    public static void AddIntegrationEventBus(
+        this IServiceCollection services,
+        string connectionString)
     {
         services
             .AddIntegrationEventBus(topology =>
@@ -42,6 +42,7 @@ internal static class ProducerExample
 
     public static async Task<Guid> PublishAsync(
         IServiceProvider services,
+        string connectionString,
         OrderPlaced integrationEvent,
         CancellationToken cancellationToken)
     {
@@ -61,3 +62,5 @@ internal static class ProducerExample
         return eventId;
     }
 }
+
+internal sealed record SampleDatabaseOptions(string ConnectionString);

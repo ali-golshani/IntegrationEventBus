@@ -1,12 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Authors>Ali Golshani</Authors>
-    <Description>SQL Server-backed integration event bus for .NET.</Description>
+    <Description>A lightweight, SQL Server-backed integration event bus for .NET with transactional publishing, explicit subscriptions, retries, and dead-letter handling.</Description>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <EnablePackageValidation>true</EnablePackageValidation>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <IsPackable>true</IsPackable>
     <PackageId>Minimal.IntegrationEventBus</PackageId>
+    <PackageIcon>package-icon.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/ali-golshani/IntegrationEventBus</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -15,10 +17,12 @@
     <RepositoryUrl>https://github.com/ali-golshani/IntegrationEventBus</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Title>Minimal Integration Event Bus</Title>
     <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\assets\package-icon.png" Pack="true" PackagePath="\" />
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 

@@ -96,6 +96,16 @@ topology.Subscription("billing", "orders", subscription =>
 Producer and processor applications must use the same stable event names, topics, subscription
 names, and event-to-subscription routes.
 
+## Event contract compatibility
+
+Event payloads may remain in SQL Server while applications are upgraded. Changes to an event type
+must therefore remain compatible with payloads written by older application versions. Prefer
+adding optional properties with suitable defaults, and avoid renaming, removing, or changing the
+type of an existing property while older events may still be pending.
+
+When a breaking contract change is unavoidable, register a new CLR event type with a new stable
+event name and keep the previous contract available until its pending deliveries have completed.
+
 ## Transactional publishing
 
 ```csharp
