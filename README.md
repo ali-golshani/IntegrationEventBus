@@ -4,6 +4,18 @@ A local-first, SQL Server-backed integration event bus for .NET 10. It stores ev
 transaction as business data and processes them asynchronously with explicit topics,
 subscriptions, handlers, retries, and dead letters.
 
+## Requirements
+
+- .NET 10
+- SQL Server
+- Permission to create the `cap` schema and its tables when running the migration
+
+## Installation
+
+```shell
+dotnet add package Minimal.IntegrationEventBus
+```
+
 ## Guarantees
 
 - Publishing the event and its delivery rows uses the caller's `SqlTransaction`.
@@ -17,18 +29,34 @@ subscriptions, handlers, retries, and dead letters.
 Handlers that call external systems should use `IntegrationEventContext.EventId` as an idempotency
 key whenever the external system supports one.
 
-## Projects
+## Getting started
 
-| Project | Responsibility |
-| --- | --- |
-| `IntegrationEventBus` | Contracts, topology, SQL Server persistence, processing, and Generic Host integration |
-
-SQL Server commands are stored as embedded `.sql` resources inside the provider package. Runtime
-values are parameterized and the database objects use the fixed `cap` schema.
-
-## Configuration
+Define an event and its handler:
 
 ```csharp
+using IntegrationEventBus;
+
+public sealed record OrderPlaced(Guid OrderId, decimal Total);
+
+public sealed class OrderPlacedHandler : IIntegrationEventHandler<OrderPlaced>
+{
+    public ValueTask HandleAsync(
+        OrderPlaced integrationEvent,
+        IntegrationEventContext context,
+        CancellationToken cancellationToken)
+    {
+        // Handle the event. Throwing an exception marks this attempt as failed.
+        return ValueTask.CompletedTask;
+    }
+}
+```
+
+Register the topology, SQL Server storage, and hosted processor:
+
+```csharp
+using IntegrationEventBus;
+using Microsoft.Extensions.DependencyInjection;
+
 services
     .AddIntegrationEventBus(topology =>
     {
@@ -54,6 +82,9 @@ services
     .AddHostedProcessor();
 ```
 
+The connection string should come from your application's configuration or secret store. Do not
+commit credentials to source control.
+
 No assembly scanning is performed. A producer-only process can define a delivery route without
 referencing the handler assembly:
 
@@ -68,6 +99,12 @@ names, and event-to-subscription routes.
 ## Transactional publishing
 
 ```csharp
+using IntegrationEventBus;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
+
+var publisher = services.GetRequiredService<IIntegrationEventPublisher>();
+
 await using var connection = new SqlConnection(connectionString);
 await connection.OpenAsync(cancellationToken);
 await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
@@ -119,4 +156,9 @@ await host.RunAsync();
 The migration creates the `cap` schema and its `Events` and `Deliveries` tables when missing. If
 the migration has not been run, normal SQL operations fail with the corresponding SQL Server error.
 
-See `samples/IntegrationEventBus.Sample` for a complete Generic Host example.
+SQL Server commands are embedded in the package, runtime values are parameterized, and database
+objects use the fixed `cap` schema.
+
+See the
+[Generic Host sample](https://github.com/ali-golshani/IntegrationEventBus/tree/main/samples/IntegrationEventBus.Sample)
+for a complete application example.

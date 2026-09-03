@@ -7,8 +7,14 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
+/// <summary>Provides SQL Server storage registration for the integration event bus.</summary>
 public static class SqlServerExtensions
 {
+    /// <summary>Configures SQL Server as the event and delivery store.</summary>
+    /// <param name="builder">The integration event bus builder.</param>
+    /// <param name="connectionString">The SQL Server connection string.</param>
+    /// <param name="configure">Optionally configures processor timing and command timeout.</param>
+    /// <returns>The supplied builder.</returns>
     public static IntegrationEventBusBuilder UseSqlServer(
         this IntegrationEventBusBuilder builder,
         string connectionString,

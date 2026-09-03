@@ -7,8 +7,7 @@ namespace IntegrationEventBus.Sample;
 
 internal static class ProducerExample
 {
-    const string connectionString =
-        "Server=.;Database=IntegrationEventBusSample;User Id=golshani;Password=Ali_Golshani;TrustServerCertificate=True;";
+    private const string connectionString = "Server=.;Database=IntegrationEventBusSample;Integrated Security=True;TrustServerCertificate=True;";
 
     public static void AddIntegrationEventBus(this IServiceCollection services)
     {

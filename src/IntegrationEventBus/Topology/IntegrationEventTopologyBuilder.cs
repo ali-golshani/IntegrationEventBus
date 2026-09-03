@@ -8,6 +8,11 @@ public sealed class IntegrationEventTopologyBuilder
     private readonly Dictionary<Type, IntegrationEventDefinition> _events = [];
     private readonly Dictionary<string, SubscriptionBuilder> _subscriptions = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Registers an integration event with a stable name and topic.</summary>
+    /// <typeparam name="TEvent">The CLR event type.</typeparam>
+    /// <param name="eventName">The stable serialized event name.</param>
+    /// <param name="topic">The topic to which the event belongs.</param>
+    /// <returns>This builder.</returns>
     public IntegrationEventTopologyBuilder Event<TEvent>(string eventName, string topic)
         where TEvent : notnull
     {
@@ -32,6 +37,11 @@ public sealed class IntegrationEventTopologyBuilder
         return this;
     }
 
+    /// <summary>Registers and configures an independent subscription to a topic.</summary>
+    /// <param name="name">The stable subscription name.</param>
+    /// <param name="topic">The subscribed topic.</param>
+    /// <param name="configure">Configures routes, handlers, and retry behavior.</param>
+    /// <returns>This builder.</returns>
     public IntegrationEventTopologyBuilder Subscription(
         string name,
         string topic,

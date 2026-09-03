@@ -21,8 +21,13 @@ public sealed class SubscriptionDefinition
         _routes = new ReadOnlyDictionary<Type, Type?>(new Dictionary<Type, Type?>(routes));
     }
 
+    /// <summary>Gets the stable subscription name.</summary>
     public string Name { get; }
+
+    /// <summary>Gets the subscribed topic.</summary>
     public string Topic { get; }
+
+    /// <summary>Gets the retry policy applied to failed deliveries.</summary>
     public RetryPolicy RetryPolicy { get; }
 
     /// <summary>
@@ -31,5 +36,6 @@ public sealed class SubscriptionDefinition
     /// </summary>
     public IReadOnlyDictionary<Type, Type?> Routes => _routes;
 
+    /// <summary>Gets whether this process registered at least one local handler.</summary>
     public bool HasHandlers => _routes.Values.Any(static handlerType => handlerType is not null);
 }

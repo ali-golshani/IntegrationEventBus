@@ -6,6 +6,7 @@ namespace IntegrationEventBus;
 /// </summary>
 public abstract record RetryPolicy
 {
+    /// <summary>Gets the default policy with immediate retries followed by deferred retries.</summary>
     public static LimitedImmediateRetries Default => new()
     {
         ImmediateRetryDelays =
@@ -19,7 +20,10 @@ public abstract record RetryPolicy
         DeadLetterAfter = TimeSpan.FromHours(24)
     };
 
+    /// <summary>Gets the stable name persisted with delivery state.</summary>
     public string Name { get; init; } = "default";
+
+    /// <summary>Gets the policy version persisted with delivery state.</summary>
     public int Version { get; init; } = 1;
 
     internal abstract RetryDecision Plan(int failedAttempt, DateTimeOffset firstFailedAtUtc, DateTimeOffset nowUtc);
@@ -37,8 +41,10 @@ public abstract record RetryPolicy
         }
     }
 
+    /// <summary>Retries indefinitely and blocks later deliveries in the subscription.</summary>
     public sealed record UnlimitedImmediateRetries : RetryPolicy
     {
+        /// <summary>Gets the delays used for successive attempts; the last delay repeats indefinitely.</summary>
         public required TimeSpan[] ImmediateRetryDelays { get; init; }
 
         internal override void Validate()
@@ -59,11 +65,19 @@ public abstract record RetryPolicy
         }
     }
 
+    /// <summary>Uses a finite immediate phase followed by non-blocking deferred retries.</summary>
     public sealed record LimitedImmediateRetries : RetryPolicy
     {
+        /// <summary>Gets the delays for blocking immediate retries.</summary>
         public required TimeSpan[] ImmediateRetryDelays { get; init; }
+
+        /// <summary>Gets the delay between non-blocking deferred retries.</summary>
         public required TimeSpan DeferredRetryDelay { get; init; }
+
+        /// <summary>Gets the maximum number of failed attempts before dead-lettering.</summary>
         public required int MaxAttempts { get; init; }
+
+        /// <summary>Gets the optional maximum time since the first failure before dead-lettering.</summary>
         public required TimeSpan? DeadLetterAfter { get; init; }
 
         internal override void Validate()
@@ -87,10 +101,16 @@ public abstract record RetryPolicy
         }
     }
 
+    /// <summary>Uses non-blocking deferred retries without an immediate retry phase.</summary>
     public sealed record DeferredRetriesOnly : RetryPolicy
     {
+        /// <summary>Gets the delay between deferred retries.</summary>
         public required TimeSpan DeferredRetryDelay { get; init; }
+
+        /// <summary>Gets the maximum number of failed attempts before dead-lettering.</summary>
         public required int MaxAttempts { get; init; }
+
+        /// <summary>Gets the optional maximum time since the first failure before dead-lettering.</summary>
         public required TimeSpan? DeadLetterAfter { get; init; }
 
         internal override void Validate()

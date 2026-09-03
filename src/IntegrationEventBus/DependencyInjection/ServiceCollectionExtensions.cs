@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
+/// <summary>Provides dependency-injection registration for the integration event bus.</summary>
 public static class IntegrationEventBusServiceCollectionExtensions
 {
     /// <summary>

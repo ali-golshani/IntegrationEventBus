@@ -19,7 +19,12 @@ public sealed class IntegrationEventBusBuilder
         SerializerOptions = serializerOptions;
     }
 
+    /// <summary>Gets the service collection being configured.</summary>
     public IServiceCollection Services { get; }
+
+    /// <summary>Gets the immutable event and subscription topology.</summary>
     public IntegrationEventTopology Topology { get; }
+
+    /// <summary>Gets the JSON serializer options used for event payloads.</summary>
     public JsonSerializerOptions SerializerOptions { get; }
 }

@@ -44,6 +44,7 @@ public sealed class SqlServerEndToEndTests
             });
 
             await using var provider = services.BuildServiceProvider();
+            await provider.GetRequiredService<EventBusMigrator>().MigrateAsync();
             var publisher = provider.GetRequiredService<IIntegrationEventPublisher>();
 
             await using (var connection = new SqlConnection(databaseConnectionString))
@@ -138,7 +139,7 @@ public sealed class SqlServerEndToEndTests
             await using var command = connection.CreateCommand();
             command.CommandText = """
                 SELECT TOP (1) [Status]
-                FROM [IntegrationEventBus].[Deliveries]
+                FROM [cap].[Deliveries]
                 WHERE [SubscriptionName] = N'test-handler';
                 """;
             var status = await command.ExecuteScalarAsync(cancellationToken);
@@ -161,8 +162,8 @@ public sealed class SqlServerEndToEndTests
         await using var command = connection.CreateCommand();
         command.CommandText = """
             SELECT
-                (SELECT COUNT(*) FROM [IntegrationEventBus].[Events]),
-                (SELECT COUNT(*) FROM [IntegrationEventBus].[Deliveries]);
+                (SELECT COUNT(*) FROM [cap].[Events]),
+                (SELECT COUNT(*) FROM [cap].[Deliveries]);
             """;
         await using var reader = await command.ExecuteReaderAsync();
         Assert.True(await reader.ReadAsync());

@@ -2,6 +2,12 @@
   <Folder Name="/samples/">
     <Project Path="samples/IntegrationEventBus.Sample/IntegrationEventBus.Sample.csproj" />
   </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/IntegrationEventBus/IntegrationEventBus.csproj" />
   </Folder>

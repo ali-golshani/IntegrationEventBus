@@ -5,6 +5,12 @@ namespace IntegrationEventBus;
 /// </summary>
 public static class RetryPlanner
 {
+    /// <summary>Calculates the outcome of a failed delivery attempt.</summary>
+    /// <param name="policy">The retry policy to apply.</param>
+    /// <param name="failedAttempt">The one-based number of the failed attempt.</param>
+    /// <param name="firstFailedAtUtc">The time at which the delivery first failed.</param>
+    /// <param name="nowUtc">The time of the current failure.</param>
+    /// <returns>The next persisted retry state.</returns>
     public static RetryDecision Plan(
         RetryPolicy policy,
         int failedAttempt,

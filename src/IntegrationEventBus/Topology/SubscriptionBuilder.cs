@@ -41,6 +41,9 @@ public sealed class SubscriptionBuilder
         return this;
     }
 
+    /// <summary>Sets the retry policy for deliveries in this subscription.</summary>
+    /// <param name="retryPolicy">The policy to apply after handler failures.</param>
+    /// <returns>This builder.</returns>
     public SubscriptionBuilder UseRetryPolicy(RetryPolicy retryPolicy)
     {
         ArgumentNullException.ThrowIfNull(retryPolicy);

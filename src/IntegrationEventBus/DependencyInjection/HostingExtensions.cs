@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
+/// <summary>Provides Generic Host integration for the integration event bus.</summary>
 public static class HostingExtensions
 {
     /// <summary>
