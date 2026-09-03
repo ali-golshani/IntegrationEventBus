@@ -1,4 +1,4 @@
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Abstractions;
 
 /// <summary>
 /// Handles one type of integration event for a configured subscription.

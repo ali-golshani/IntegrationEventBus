@@ -1,6 +1,6 @@
-using IntegrationEventBus.Infrastructure;
+using IntegrationEventBus.Core.Infrastructure;
 
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Core.Processing;
 
 internal sealed class ProcessorSignal : IProcessorSignal
 {

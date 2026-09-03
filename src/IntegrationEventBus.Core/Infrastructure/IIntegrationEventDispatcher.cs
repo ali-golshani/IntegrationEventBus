@@ -1,4 +1,6 @@
-namespace IntegrationEventBus.Infrastructure;
+using IntegrationEventBus.Core.Topology;
+
+namespace IntegrationEventBus.Core.Infrastructure;
 
 public interface IIntegrationEventDispatcher
 {

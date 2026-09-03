@@ -1,11 +1,15 @@
-using IntegrationEventBus.Infrastructure;
+using IntegrationEventBus.Core;
+using IntegrationEventBus.Core.Infrastructure;
+using IntegrationEventBus.Core.Topology;
+using IntegrationEventBus.SqlServer.Sql;
+using IntegrationEventBus.SqlServer.Storage;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace IntegrationEventBus.SqlServer;
+namespace IntegrationEventBus.SqlServer.Processing;
 
 internal sealed class SqlServerSubscriptionRunner(
     SqlServerIntegrationEventBusOptions options,

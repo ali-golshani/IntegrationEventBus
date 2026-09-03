@@ -1,4 +1,4 @@
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Abstractions;
 
 /// <summary>
 /// Immutable metadata associated with a handler invocation.

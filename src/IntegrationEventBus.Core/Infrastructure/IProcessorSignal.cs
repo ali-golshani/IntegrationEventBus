@@ -1,4 +1,4 @@
-namespace IntegrationEventBus.Infrastructure;
+namespace IntegrationEventBus.Core.Infrastructure;
 
 public interface IProcessorSignal
 {

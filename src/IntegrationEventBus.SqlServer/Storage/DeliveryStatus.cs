@@ -1,4 +1,4 @@
-namespace IntegrationEventBus.SqlServer;
+namespace IntegrationEventBus.SqlServer.Storage;
 
 internal enum DeliveryStatus : byte
 {

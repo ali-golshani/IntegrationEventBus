@@ -1,9 +1,13 @@
 using System.Data;
 using System.Data.Common;
-using IntegrationEventBus.Infrastructure;
+using IntegrationEventBus.Abstractions;
+using IntegrationEventBus.Core.Infrastructure;
+using IntegrationEventBus.Core.Topology;
+using IntegrationEventBus.SqlServer.Sql;
+using IntegrationEventBus.SqlServer.Storage;
 using Microsoft.Data.SqlClient;
 
-namespace IntegrationEventBus.SqlServer;
+namespace IntegrationEventBus.SqlServer.Publishing;
 
 internal sealed class SqlServerIntegrationEventPublisher(
     IntegrationEventTopology topology,

@@ -1,8 +1,9 @@
-using IntegrationEventBus.Infrastructure;
+using IntegrationEventBus.Core.Infrastructure;
+using IntegrationEventBus.Core.Topology;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Hosting;
 
 internal sealed class IntegrationEventBusHostedService(
     IntegrationEventTopology topology,

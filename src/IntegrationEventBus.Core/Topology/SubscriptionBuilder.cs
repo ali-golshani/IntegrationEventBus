@@ -1,4 +1,6 @@
-namespace IntegrationEventBus;
+using IntegrationEventBus.Abstractions;
+
+namespace IntegrationEventBus.Core.Topology;
 
 /// <summary>
 /// Configures the event routes and retry policy for a subscription.

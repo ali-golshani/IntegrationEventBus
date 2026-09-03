@@ -1,6 +1,6 @@
 using System.Data.Common;
 
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Abstractions;
 
 /// <summary>
 /// Persists integration events for durable, asynchronous delivery.

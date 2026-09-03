@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Core.Topology;
 
 /// <summary>
 /// Describes one independent consumer of a topic.

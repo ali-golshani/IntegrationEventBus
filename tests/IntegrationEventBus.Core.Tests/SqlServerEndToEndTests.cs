@@ -1,5 +1,6 @@
 using System.Data;
-using IntegrationEventBus.Infrastructure;
+using IntegrationEventBus.Abstractions;
+using IntegrationEventBus.Core.Infrastructure;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 

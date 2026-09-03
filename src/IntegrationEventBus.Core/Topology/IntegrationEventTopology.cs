@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Core.Topology;
 
 /// <summary>
 /// Immutable event and subscription topology shared by publishers and processors.

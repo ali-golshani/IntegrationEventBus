@@ -1,4 +1,4 @@
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Core;
 
 /// <summary>
 /// Defines how a failed delivery is retried. The definition lives in application configuration;

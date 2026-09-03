@@ -1,9 +1,11 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
-using IntegrationEventBus.Infrastructure;
+using IntegrationEventBus.Abstractions;
+using IntegrationEventBus.Core.Infrastructure;
+using IntegrationEventBus.Core.Topology;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Core.Processing;
 
 internal sealed class IntegrationEventDispatcher(
     IntegrationEventTopology topology,

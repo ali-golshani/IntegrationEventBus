@@ -1,3 +1,4 @@
+using IntegrationEventBus.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace IntegrationEventBus.Sample;

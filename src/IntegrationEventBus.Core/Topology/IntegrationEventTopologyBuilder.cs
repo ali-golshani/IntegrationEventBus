@@ -1,4 +1,4 @@
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Core.Topology;
 
 /// <summary>
 /// Builds the explicit event and subscription topology. No assembly scanning is performed.

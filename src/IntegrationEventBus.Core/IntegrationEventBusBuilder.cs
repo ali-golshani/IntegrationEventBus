@@ -1,7 +1,8 @@
 using System.Text.Json;
+using IntegrationEventBus.Core.Topology;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Core;
 
 /// <summary>
 /// Provides provider and hosting extensions with access to the configured service collection.

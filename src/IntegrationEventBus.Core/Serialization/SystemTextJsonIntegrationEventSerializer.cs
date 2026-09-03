@@ -1,7 +1,7 @@
-using IntegrationEventBus.Infrastructure;
+using IntegrationEventBus.Core.Infrastructure;
 using System.Text.Json;
 
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Core.Serialization;
 
 internal sealed class SystemTextJsonIntegrationEventSerializer(JsonSerializerOptions options)
     : IIntegrationEventSerializer

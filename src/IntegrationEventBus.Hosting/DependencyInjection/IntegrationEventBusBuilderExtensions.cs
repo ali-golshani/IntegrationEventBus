@@ -1,4 +1,5 @@
-using IntegrationEventBus;
+using IntegrationEventBus.Core;
+using IntegrationEventBus.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 

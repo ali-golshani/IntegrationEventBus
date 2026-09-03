@@ -1,3 +1,4 @@
+using IntegrationEventBus.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IntegrationEventBus.Core.Tests;

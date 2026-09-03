@@ -1,4 +1,4 @@
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Core;
 
 /// <summary>
 /// The result of evaluating a failed delivery against its current retry policy.

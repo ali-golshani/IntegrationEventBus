@@ -1,6 +1,9 @@
 using System.Text.Json;
-using IntegrationEventBus;
-using IntegrationEventBus.Infrastructure;
+using IntegrationEventBus.Core;
+using IntegrationEventBus.Core.Infrastructure;
+using IntegrationEventBus.Core.Processing;
+using IntegrationEventBus.Core.Serialization;
+using IntegrationEventBus.Core.Topology;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;

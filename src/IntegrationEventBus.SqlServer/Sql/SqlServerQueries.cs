@@ -1,8 +1,8 @@
 using System.Data;
-using IntegrationEventBus.Infrastructure;
+using IntegrationEventBus.Core.Infrastructure;
 using Microsoft.Data.SqlClient;
 
-namespace IntegrationEventBus.SqlServer;
+namespace IntegrationEventBus.SqlServer.Sql;
 
 internal static class SqlServerQueries
 {

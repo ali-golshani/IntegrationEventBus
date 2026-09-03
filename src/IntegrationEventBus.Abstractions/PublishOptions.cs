@@ -1,4 +1,4 @@
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Abstractions;
 
 /// <summary>
 /// Optional metadata supplied when publishing an integration event.

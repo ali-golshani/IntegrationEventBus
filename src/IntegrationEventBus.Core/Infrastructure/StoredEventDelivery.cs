@@ -1,4 +1,4 @@
-namespace IntegrationEventBus.Infrastructure;
+namespace IntegrationEventBus.Core.Infrastructure;
 
 /// <summary>
 /// Storage-neutral representation of an event delivery selected for execution.

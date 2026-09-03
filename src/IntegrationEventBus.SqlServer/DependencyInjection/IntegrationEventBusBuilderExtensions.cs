@@ -1,6 +1,10 @@
-using IntegrationEventBus;
-using IntegrationEventBus.Infrastructure;
+using IntegrationEventBus.Abstractions;
+using IntegrationEventBus.Core;
+using IntegrationEventBus.Core.Infrastructure;
 using IntegrationEventBus.SqlServer;
+using IntegrationEventBus.SqlServer.Processing;
+using IntegrationEventBus.SqlServer.Publishing;
+using IntegrationEventBus.SqlServer.Storage;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;

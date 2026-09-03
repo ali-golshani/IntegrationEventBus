@@ -1,4 +1,4 @@
-namespace IntegrationEventBus;
+namespace IntegrationEventBus.Core;
 
 /// <summary>
 /// Calculates retry state without performing I/O.
