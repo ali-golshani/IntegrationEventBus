@@ -65,7 +65,7 @@ services
         topology.Subscription("billing", "orders", subscription =>
         {
             subscription.Handle<OrderPlaced, OrderPlacedHandler>();
-            subscription.UseRetryPolicy(new RetryPolicy.UnlimitedImmediateRetries
+            subscription.UseRetryPolicy(new RetryPolicy.LimitedImmediateRetries
             {
                 Name = "external-api",
                 Version = 1,
@@ -74,7 +74,10 @@ services
                     TimeSpan.FromSeconds(1),
                     TimeSpan.FromSeconds(5),
                     TimeSpan.FromSeconds(30)
-                ]
+                ],
+                DeferredRetryDelay = TimeSpan.FromMinutes(15),
+                MaxAttempts = 20,
+                DeadLetterAfter = TimeSpan.FromHours(24)
             });
         });
     })
@@ -147,8 +150,9 @@ The retry definition remains in application configuration. SQL Server persists t
 Changing a policy affects the next failure calculation. An already persisted `NextAttemptAtUtc`
 is not recalculated during application startup.
 
-Use `RetryPolicy.UnlimitedImmediateRetries` to keep retrying the blocking event with the final
-immediate delay. Later events in the subscription remain blocked until it succeeds.
+With `RetryPolicy.LimitedImmediateRetries`, the configured immediate attempts block later events.
+After that phase, retries use `DeferredRetryDelay` without blocking later events. A delivery is
+dead-lettered when it reaches `MaxAttempts` or `DeadLetterAfter`, whichever happens first.
 
 ## Database
 
