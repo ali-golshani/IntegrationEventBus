@@ -1,4 +1,4 @@
-INSERT INTO [cap].[Events]
+INSERT INTO [eventbus].[Events]
     ([Id], [EventName], [Topic], [PayloadJson], [OccurredAtUtc],
      [CreatedAtUtc], [CorrelationId], [CausationId])
 VALUES

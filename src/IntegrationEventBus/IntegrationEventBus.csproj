@@ -10,6 +10,7 @@
     <PackageId>Minimal.IntegrationEventBus</PackageId>
     <PackageIcon>package-icon.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageOutputPath>..\..\artifacts\release</PackageOutputPath>
     <PackageProjectUrl>https://github.com/ali-golshani/IntegrationEventBus</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>integration-events;event-bus;sql-server;transactional-outbox;dotnet</PackageTags>

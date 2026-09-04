@@ -5,8 +5,8 @@
         e.[Sequence] AS [EventSequence],
         d.[BlocksFollowing],
         d.[NextAttemptAtUtc]
-    FROM [cap].[Deliveries] AS d WITH (UPDLOCK, HOLDLOCK, ROWLOCK)
-    INNER JOIN [cap].[Events] AS e ON e.[Id] = d.[EventId]
+    FROM [eventbus].[Deliveries] AS d WITH (UPDLOCK, HOLDLOCK, ROWLOCK)
+    INNER JOIN [eventbus].[Events] AS e ON e.[Id] = d.[EventId]
     WHERE d.[SubscriptionName] = @SubscriptionName
       AND d.[Status] IN (@Pending, @Retrying)
 ),
@@ -45,6 +45,6 @@ OUTPUT
     e.[CausationId],
     inserted.[AttemptCount],
     inserted.[FirstFailedAtUtc]
-FROM [cap].[Deliveries] AS d
+FROM [eventbus].[Deliveries] AS d
 INNER JOIN [Candidate] AS c ON c.[Id] = d.[Id]
-INNER JOIN [cap].[Events] AS e ON e.[Id] = d.[EventId];
+INNER JOIN [eventbus].[Events] AS e ON e.[Id] = d.[EventId];

@@ -1,4 +1,4 @@
-UPDATE [cap].[Deliveries]
+UPDATE [eventbus].[Deliveries]
 SET [Status] = @Status,
     [BlocksFollowing] = @BlocksFollowing,
     [NextAttemptAtUtc] = @NextAttemptAtUtc,

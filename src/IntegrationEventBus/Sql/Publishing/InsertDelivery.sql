@@ -1,4 +1,4 @@
-INSERT INTO [cap].[Deliveries]
+INSERT INTO [eventbus].[Deliveries]
     ([EventId], [SubscriptionName], [Status], [AttemptCount], [BlocksFollowing],
      [NextAttemptAtUtc], [RetryPolicyName], [RetryPolicyVersion])
 VALUES

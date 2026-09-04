@@ -139,7 +139,7 @@ public sealed class SqlServerEndToEndTests
             await using var command = connection.CreateCommand();
             command.CommandText = """
                 SELECT TOP (1) [Status]
-                FROM [cap].[Deliveries]
+                FROM [eventbus].[Deliveries]
                 WHERE [SubscriptionName] = N'test-handler';
                 """;
             var status = await command.ExecuteScalarAsync(cancellationToken);
@@ -162,8 +162,8 @@ public sealed class SqlServerEndToEndTests
         await using var command = connection.CreateCommand();
         command.CommandText = """
             SELECT
-                (SELECT COUNT(*) FROM [cap].[Events]),
-                (SELECT COUNT(*) FROM [cap].[Deliveries]);
+                (SELECT COUNT(*) FROM [eventbus].[Events]),
+                (SELECT COUNT(*) FROM [eventbus].[Deliveries]);
             """;
         await using var reader = await command.ExecuteReaderAsync();
         Assert.True(await reader.ReadAsync());

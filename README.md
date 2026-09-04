@@ -8,7 +8,7 @@ subscriptions, handlers, retries, and dead letters.
 
 - .NET 10
 - SQL Server
-- Permission to create the `cap` schema and its tables when running the migration
+- Permission to create the `eventbus` schema and its tables when running the migration
 
 ## Installation
 
@@ -163,11 +163,11 @@ await host.Services
 await host.RunAsync();
 ```
 
-The migration creates the `cap` schema and its `Events` and `Deliveries` tables when missing. If
+The migration creates the `eventbus` schema and its `Events` and `Deliveries` tables when missing. If
 the migration has not been run, normal SQL operations fail with the corresponding SQL Server error.
 
 SQL Server commands are embedded in the package, runtime values are parameterized, and database
-objects use the fixed `cap` schema.
+objects use the fixed `eventbus` schema.
 
 See the
 [Generic Host sample](https://github.com/ali-golshani/IntegrationEventBus/tree/main/samples/IntegrationEventBus.Sample)

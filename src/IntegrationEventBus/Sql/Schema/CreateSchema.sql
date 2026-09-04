@@ -3,7 +3,7 @@ BEGIN TRANSACTION;
 
 DECLARE @lockResult INT;
 EXEC @lockResult = sys.sp_getapplock
-    @Resource = N'IntegrationEventBus:Schema:cap',
+    @Resource = N'IntegrationEventBus:Schema:eventbus',
     @LockMode = 'Exclusive',
     @LockOwner = 'Transaction',
     @LockTimeout = 30000;
@@ -11,12 +11,12 @@ EXEC @lockResult = sys.sp_getapplock
 IF @lockResult < 0
     THROW 50000, 'Could not acquire the IntegrationEventBus schema lock.', 1;
 
-IF SCHEMA_ID(N'cap') IS NULL
-    EXEC(N'CREATE SCHEMA [cap]');
+IF SCHEMA_ID(N'eventbus') IS NULL
+    EXEC(N'CREATE SCHEMA [eventbus]');
 
-IF OBJECT_ID(N'[cap].[Events]', N'U') IS NULL
+IF OBJECT_ID(N'[eventbus].[Events]', N'U') IS NULL
 BEGIN
-    CREATE TABLE [cap].[Events]
+    CREATE TABLE [eventbus].[Events]
     (
         [Sequence] BIGINT IDENTITY(1,1) NOT NULL,
         [Id] UNIQUEIDENTIFIER NOT NULL,
@@ -32,9 +32,9 @@ BEGIN
     );
 END;
 
-IF OBJECT_ID(N'[cap].[Deliveries]', N'U') IS NULL
+IF OBJECT_ID(N'[eventbus].[Deliveries]', N'U') IS NULL
 BEGIN
-    CREATE TABLE [cap].[Deliveries]
+    CREATE TABLE [eventbus].[Deliveries]
     (
         [Id] BIGINT IDENTITY(1,1) NOT NULL,
         [EventId] UNIQUEIDENTIFIER NOT NULL,
@@ -51,13 +51,13 @@ BEGIN
         [RetryPolicyVersion] INT NOT NULL,
         CONSTRAINT [PK_IntegrationEventBus_Deliveries] PRIMARY KEY CLUSTERED ([Id]),
         CONSTRAINT [FK_IntegrationEventBus_Deliveries_Events]
-            FOREIGN KEY ([EventId]) REFERENCES [cap].[Events]([Id]),
+            FOREIGN KEY ([EventId]) REFERENCES [eventbus].[Events]([Id]),
         CONSTRAINT [UQ_IntegrationEventBus_Deliveries_Event_Subscription]
             UNIQUE ([EventId], [SubscriptionName])
     );
 
     CREATE INDEX [IX_IntegrationEventBus_Deliveries_Ready]
-        ON [cap].[Deliveries]
+        ON [eventbus].[Deliveries]
         ([SubscriptionName], [Status], [BlocksFollowing], [NextAttemptAtUtc])
         INCLUDE ([EventId], [AttemptCount]);
 END;

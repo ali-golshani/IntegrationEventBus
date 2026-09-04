@@ -2,5 +2,5 @@ namespace IntegrationEventBus;
 
 internal static class SqlConstants
 {
-    public const string SchemaName = "cap";
+    public const string SchemaName = "eventbus";
 }
